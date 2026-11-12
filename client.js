@@ -1403,10 +1403,10 @@ window.__ModuleLoader__.load({
       const ivy = Math.max(0, Math.floor(num(options === undefined ? 0 : options.ivy)))
       const dandelions = Math.max(0, Math.floor(num(options === undefined ? 0 : options.dandelions)))
       const reduced = options !== undefined && options !== null && options.reduced === true
-      const segments = Math.min(10, Math.ceil(ivy / 40))
-      const seedCount = reduced ? 0 : Math.min(30, Math.ceil(dandelions * 2.5))
+      const segments = Math.min(16, Math.ceil(ivy / 30))
+      const seedCount = reduced ? 0 : Math.min(56, Math.ceil(dandelions * 3.5))
       if (segments === 0 && seedCount === 0) return ''
-      const span = Math.max(90, (height - 140) / Math.max(segments, 1))
+      const span = Math.max(64, (height - 120) / Math.max(segments, 1))
       let vines = ''
       for (let i = 0; i < segments; i += 1) {
         const side = i % 2 === 0 ? 1 : -1

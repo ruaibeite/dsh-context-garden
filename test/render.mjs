@@ -572,9 +572,9 @@ await test('overlay builder draws ivy and dandelion seeds, and nothing when empt
   assert.ok(!ivy.includes('cg-overlay-seed'), 'unexpected seeds without dandelions')
   const seeds = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 8 })
   const seedCount = (seeds.match(/cg-overlay-seed/g) || []).length
-  assert.equal(seedCount, 20, 'expected 2.5 seeds per dandelion, capped, got ' + seedCount)
+  assert.equal(seedCount, 28, 'expected 3.5 seeds per dandelion, capped, got ' + seedCount)
   const capped = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 99 })
-  assert.equal((capped.match(/cg-overlay-seed/g) || []).length, 30)
+  assert.equal((capped.match(/cg-overlay-seed/g) || []).length, 56)
   const reduced = build({ width: 900, height: 700 }, { ivy: 400, dandelions: 8, reduced: true })
   assert.ok(!reduced.includes('cg-overlay-seed'), 'seeds must be hidden under reduced motion')
   assert.ok(reduced.includes('cg-vine'), 'static vines should remain under reduced motion')
