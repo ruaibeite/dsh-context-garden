@@ -1,6 +1,6 @@
 {
   "name": "@ruaibeite/dsh-context-garden",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Turn the context window into a zen garden: every message or tool result plants a plant (code = cactus, image = flower, error = weed), context compaction is the harvest, and harvested plants become seed currency as the field moves through four seasons.",
   "license": "MIT",

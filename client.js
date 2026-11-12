@@ -33,14 +33,14 @@ window.__ModuleLoader__.load({
     const TAB_ID = NS + '/garden'
     const TAB_KIND = 'context-garden'
     /** Kinds, in field-guide order. */
-    const KINDS = ['cactus', 'flower', 'weed', 'bamboo', 'grass', 'sprout']
+    const KINDS = ['cactus', 'flower', 'weed', 'bamboo', 'rice', 'grass', 'sprout', 'ivy', 'dandelion', 'mushroom', 'lotus']
     /** Mirrors the host cap so a malformed payload cannot bloat the field. */
     const FIELD_CAP = 240
     const HARVEST_CAP = 24
     /** How long the harvest animation keeps the previous field on screen. */
     const HARVEST_MS = 2600
-    /** Plants drawn in the composer-dock strip. */
-    const DOCK_PLANTS = 14
+    /** Plants drawn in the composer-top bed. */
+    const MAX_BED_PLANTS = 26
     /** Plants drawn in the sidebar scene. */
     const PANEL_PLANTS = 30
     const SEASONS = ['spring', 'summer', 'autumn', 'winter']
@@ -105,14 +105,24 @@ window.__ModuleLoader__.load({
         'kind.flower': '花',
         'kind.weed': '杂草',
         'kind.bamboo': '竹',
+        'kind.rice': '稻穗',
         'kind.grass': '草',
         'kind.sprout': '幼苗',
         'kind.cactusMean': '代码与执行',
         'kind.flowerMean': '图片',
         'kind.weedMean': '报错',
         'kind.bambooMean': '回答与长文',
+        'kind.riceMean': '文书与产出',
         'kind.grassMean': '阅读与检索',
         'kind.sproutMean': '你说的每一句',
+        'kind.ivy': '爬山虎',
+        'kind.ivyMean': '一步步的深入（会沿着对话边缘爬）',
+        'kind.dandelion': '蒲公英',
+        'kind.dandelionMean': '网络与探索（种子会飘散）',
+        'kind.mushroom': '蘑菇',
+        'kind.mushroomMean': '任务、计划与子代理',
+        'kind.lotus': '莲',
+        'kind.lotusMean': '压缩后的摘要',
         'unlock.stone': '苔石',
         'unlock.lantern': '石灯笼',
         'unlock.pond': '小池',
@@ -168,14 +178,24 @@ window.__ModuleLoader__.load({
         'kind.flower': 'Flower',
         'kind.weed': 'Weed',
         'kind.bamboo': 'Bamboo',
+        'kind.rice': 'Rice',
         'kind.grass': 'Grass',
         'kind.sprout': 'Sprout',
         'kind.cactusMean': 'Code and execution',
         'kind.flowerMean': 'Images',
         'kind.weedMean': 'Errors',
         'kind.bambooMean': 'Answers and long text',
+        'kind.riceMean': 'Documents and deliverables',
         'kind.grassMean': 'Reading and search',
         'kind.sproutMean': 'Your words',
+        'kind.ivy': 'Ivy',
+        'kind.ivyMean': 'Step-by-step depth (climbs the chat)',
+        'kind.dandelion': 'Dandelion',
+        'kind.dandelionMean': 'Web and exploration (seeds drift)',
+        'kind.mushroom': 'Mushroom',
+        'kind.mushroomMean': 'Tasks, plans and subagents',
+        'kind.lotus': 'Lotus',
+        'kind.lotusMean': 'The compacted summary',
         'unlock.stone': 'moss stone',
         'unlock.lantern': 'stone lantern',
         'unlock.pond': 'koi pond',
@@ -553,6 +573,37 @@ window.__ModuleLoader__.load({
           }),
         )
       }
+      if (kind === 'rice') {
+        return h(
+          React.Fragment,
+          null,
+          h('path', { d: 'M0 0 V-16.8', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.25, strokeLinecap: 'round' }),
+          h('path', {
+            d: 'M0 -5.6 Q-3.4 -7 -4.6 -10.4 M0 -9 Q3.2 -10.4 4.4 -13.6',
+            fill: 'none',
+            stroke: 'var(--cg-leaf)',
+            strokeWidth: 0.9,
+            strokeLinecap: 'round',
+          }),
+          h(
+            'g',
+            { fill: 'var(--cg-rice)' },
+            h('ellipse', { cx: -0.9, cy: -18.6, rx: 1.15, ry: 2.1, transform: 'rotate(-18 -0.9 -18.6)' }),
+            h('ellipse', { cx: 1.1, cy: -19.6, rx: 1.15, ry: 2.1, transform: 'rotate(14 1.1 -19.6)' }),
+            h('ellipse', { cx: -1.5, cy: -16.6, rx: 1.1, ry: 2, transform: 'rotate(-22 -1.5 -16.6)' }),
+            h('ellipse', { cx: 1.7, cy: -17.2, rx: 1.1, ry: 2, transform: 'rotate(18 1.7 -17.2)' }),
+            h('ellipse', { cx: 0.1, cy: -20.4, rx: 1, ry: 1.9, transform: 'rotate(-2 0.1 -20.4)' }),
+          ),
+          h('path', {
+            d: 'M-2.4 -19.8 Q-4 -21.4 -4.8 -23.4',
+            fill: 'none',
+            stroke: 'var(--cg-rice)',
+            strokeWidth: 0.55,
+            strokeLinecap: 'round',
+            opacity: 0.7,
+          }),
+        )
+      }
       if (kind === 'grass') {
         return h(
           React.Fragment,
@@ -564,6 +615,124 @@ window.__ModuleLoader__.load({
             strokeWidth: 1.05,
             strokeLinecap: 'round',
           }),
+        )
+      }
+      if (kind === 'ivy') {
+        return h(
+          React.Fragment,
+          null,
+          h('path', {
+            d: 'M-1 0 Q-3.4 -3.6 -0.6 -6.4 Q2 -9 -0.2 -11.8 Q-2 -14.2 -0.4 -16.4',
+            fill: 'none',
+            stroke: 'var(--cg-ivy)',
+            strokeWidth: 1.15,
+            strokeLinecap: 'round',
+          }),
+          h('path', {
+            d: 'M-2.6 -8.2 q-2.2 -0.4 -3 -2.6 q2.1 -0.5 3.4 0.6 q0.9 -1.6 2.9 -1.4 q-0.6 2.2 -3.3 3.4 z',
+            fill: 'var(--cg-ivy)',
+            opacity: 0.92,
+          }),
+          h('path', {
+            d: 'M1.4 -12.6 q1.9 -1.6 3.9 -0.9 q-0.4 2 -2.5 2.5 q1 1.3 0.2 2.9 q-2 -0.9 -2.4 -3.2 q-1.4 0.3 -2.4 -0.9 q1.2 -1.3 3.2 -0.4 z',
+            fill: 'var(--cg-ivy)',
+            opacity: 0.78,
+          }),
+          h('path', {
+            d: 'M-1.6 -2.4 q-2.4 0.4 -3.2 -1.6 q1.9 -1.1 3.6 0.2',
+            fill: 'var(--cg-ivy)',
+            opacity: 0.7,
+          }),
+        )
+      }
+      if (kind === 'dandelion') {
+        const rays = []
+        for (let i = 0; i < 9; i += 1) {
+          const angle = (i * 40) % 360
+          rays.push(
+            h('path', {
+              key: 'ray' + i,
+              d: 'M0 -16.4 l0 -3.4',
+              transform: 'rotate(' + angle + ' 0 -16.4)',
+              stroke: 'var(--cg-dandelion)',
+              strokeWidth: 0.6,
+              strokeLinecap: 'round',
+            }),
+          )
+        }
+        return h(
+          React.Fragment,
+          null,
+          h('path', { d: 'M0 0 V-13.6', stroke: 'var(--cg-leaf)', strokeWidth: 1, strokeLinecap: 'round' }),
+          h('path', {
+            d: 'M0 -3.6 Q-3.4 -4.8 -4.4 -7.8 M0 -6 Q3 -7 3.8 -9.6',
+            fill: 'none',
+            stroke: 'var(--cg-leaf)',
+            strokeWidth: 0.8,
+            strokeLinecap: 'round',
+          }),
+          h('circle', { cx: 0, cy: -16.4, r: 1.1, fill: 'var(--cg-dandelion)' }),
+          rays,
+          h('circle', { cx: 4.9, cy: -19.4, r: 0.75, fill: 'var(--cg-dandelion)', opacity: 0.9 }),
+          h('path', {
+            d: 'M4.9 -19.4 l1.6 -3.2',
+            stroke: 'var(--cg-dandelion)',
+            strokeWidth: 0.4,
+            strokeLinecap: 'round',
+            opacity: 0.8,
+          }),
+        )
+      }
+      if (kind === 'mushroom') {
+        return h(
+          React.Fragment,
+          null,
+          h('path', {
+            d: 'M-1.7 0 V-5.2 Q-1.7 -7 0 -7 Q1.7 -7 1.7 -5.2 V0 Z',
+            fill: 'var(--cg-mushroom-stem)',
+            stroke: 'var(--cg-soil-line)',
+            strokeWidth: 0.25,
+          }),
+          h('path', {
+            d: 'M-5.8 -5.4 Q-5.8 -11 0 -11 Q5.8 -11 5.8 -5.4 Q0 -3.6 -5.8 -5.4 Z',
+            fill: 'var(--cg-mushroom)',
+          }),
+          h('circle', { cx: -2.4, cy: -7.8, r: 0.75, fill: 'var(--cg-paper)', opacity: 0.75 }),
+          h('circle', { cx: 1.6, cy: -8.8, r: 0.6, fill: 'var(--cg-paper)', opacity: 0.7 }),
+          h('circle', { cx: 3.1, cy: -6.4, r: 0.45, fill: 'var(--cg-paper)', opacity: 0.6 }),
+        )
+      }
+      if (kind === 'lotus') {
+        return h(
+          React.Fragment,
+          null,
+          h('ellipse', { cx: 0, cy: -1.1, rx: 5.6, ry: 1.7, fill: 'var(--cg-water)', opacity: 0.4 }),
+          h('path', { d: 'M0 0 V-8.6', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.05, strokeLinecap: 'round' }),
+          h('ellipse', {
+            cx: -3.4,
+            cy: -9.4,
+            rx: 2.4,
+            ry: 1.1,
+            transform: 'rotate(-18 -3.4 -9.4)',
+            fill: 'var(--cg-lotus)',
+            opacity: 0.9,
+          }),
+          h(
+            'g',
+            null,
+            [-58, -29, 0, 29, 58].map((angle, i) =>
+              h('ellipse', {
+                key: 'petal' + i,
+                cx: 0,
+                cy: -13.4,
+                rx: 1.75,
+                ry: 3.2,
+                transform: 'rotate(' + angle + ' 0 -13.4)',
+                fill: 'var(--cg-lotus)',
+              }),
+            ),
+          ),
+          h('circle', { cx: 0, cy: -13.2, r: 1.15, fill: 'var(--cg-amber)' }),
         )
       }
       // sprout
@@ -1156,106 +1325,222 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /** A tiny garden bed seen through the composer-dock window. */
-    function DockField(props) {
+    /** The full-width, borderless bed that rests on the composer's top edge. */
+    function GardenBed(props) {
       const garden = props.garden
       const season = props.season
       const flash = props.flash
-      const tr = props.tr
-      const width = 150
-      const height = 30
-      const soilY = 22.5
-      const visible = garden.plants.slice(-10)
-      const count = Math.max(1, visible.length)
-      const placed = visible.map((plant, index) => {
-        const seed = hashNum(plant.seq * 29 + 5)
-        const jitter = (seed % 1000) / 1000 - 0.5
+      const flashPlants = flash !== null && Array.isArray(flash.plants) && flash.plants.length > 0 ? flash.plants : null
+      const plants = flashPlants !== null ? flashPlants : garden.plants
+      const visible = plants.slice(-MAX_BED_PLANTS)
+      const flying = flashPlants !== null
+      const rows = visible.map((plant, index) => {
+        const seed = hashNum(plant.seq * 41 + 3)
+        const slotCount = Math.max(1, visible.length)
+        const base = 4 + 92 * ((index + 0.5) / slotCount)
+        const jitter = ((seed % 1000) / 1000 - 0.5) * (slotCount > 16 ? 2.4 : 4)
         const row = index % 2
-        const x = clamp(12 + (width - 24) * ((index + 0.5) / count) + jitter * 4.5, 8, width - 8)
-        const scale = (row === 0 ? 0.66 : 0.78) * (0.9 + ((hashNum(seed) % 100) / 100) * 0.2)
-        return { plant, index, row, x, y: row === 0 ? soilY + 5.4 : soilY + 3.4, scale }
+        const scale = (row === 0 ? 0.92 : 1.06) * (0.9 + ((hashNum(seed) % 100) / 100) * 0.2)
+        return { plant, index, row, x: base + jitter, scale, seed }
       })
-      placed.sort((a, b) => a.row - b.row || a.plant.seq - b.plant.seq)
       return h(
         'div',
-        {
-          className: 'cg-dock-field' + (flash === null ? '' : ' cg-harvesting'),
-          'data-season': season.key,
-        },
-        h(
-          'svg',
-          {
-            className: 'cg-field',
-            viewBox: '0 0 ' + width + ' ' + height,
-            preserveAspectRatio: 'xMidYMax meet',
-            'aria-hidden': true,
-          },
-          h('path', {
-            d:
-              'M0 ' + soilY +
-              ' Q' + width * 0.28 + ' ' + (soilY - 1.6) +
-              ' ' + width * 0.55 + ' ' + soilY +
-              ' T' + width + ' ' + (soilY - 0.6) +
-              ' L' + width + ' ' + height + ' L0 ' + height + ' Z',
-            fill: 'var(--cg-soil)',
-            opacity: 0.94,
-          }),
-          h('path', {
-            d:
-              'M0 ' + (soilY + 3) +
-              ' Q' + width * 0.5 + ' ' + (soilY + 1.8) +
-              ' ' + width + ' ' + (soilY + 3.2) +
-              ' L' + width + ' ' + height + ' L0 ' + height + ' Z',
-            fill: 'var(--cg-soil-2)',
-            opacity: 0.3,
-          }),
-          h('path', {
-            d: 'M8 ' + (soilY + 4.6) + ' Q' + width * 0.5 + ' ' + (soilY + 3.4) + ' ' + (width - 8) + ' ' + (soilY + 4.6),
-            fill: 'none',
-            stroke: 'var(--cg-soil-line)',
-            strokeWidth: 0.5,
-            opacity: 0.3,
-          }),
-          season.key === 'winter'
-            ? h('path', {
-                key: 'dock-snow',
-                d:
-                  'M0 ' + (soilY + 0.4) +
-                  ' Q' + width * 0.3 + ' ' + (soilY - 1.6) +
-                  ' ' + width * 0.58 + ' ' + (soilY + 0.2) +
-                  ' T' + width + ' ' + (soilY - 0.2) +
-                  ' L' + width + ' ' + (soilY + 3.4) +
-                  ' Q' + width * 0.5 + ' ' + (soilY + 5.2) +
-                  ' 0 ' + (soilY + 3.2) + ' Z',
-                fill: 'var(--cg-snow)',
-                opacity: 0.8,
-              })
-            : null,
-          h(Weather, { season: season.key, count: 3, width, height: soilY }),
-          visible.length === 0 && flash === null
-            ? h(
-                'g',
-                { key: 'dock-mound', className: 'cg-seed-mound', opacity: 0.85 },
-                h('ellipse', { cx: width * 0.5, cy: soilY + 5.2, rx: 9, ry: 2.6, fill: 'var(--cg-soil-2)', opacity: 0.6 }),
-                h('path', { d: 'M' + (width * 0.5 - 7) + ' ' + (soilY + 5.2) + ' q7 -4.6 14 0 z', fill: 'var(--cg-soil-2)' }),
-                h('circle', { cx: width * 0.5 - 2, cy: soilY + 2.6, r: 0.6, fill: 'var(--cg-amber)' }),
-                h('circle', { cx: width * 0.5 + 2, cy: soilY + 2.9, r: 0.5, fill: 'var(--cg-amber)' }),
-              )
-            : null,
-          placed.map((entry) =>
-            h(Plant, {
-              key: 'd' + entry.plant.seq + '-' + entry.index,
-              plant: entry.plant,
-              x: entry.x,
-              y: entry.y,
-              scale: entry.scale,
-              flying: flash !== null,
-              flyDelay: (entry.index % 5) * 45,
-            }),
+        { className: 'cg-bed', 'data-season': season.key, 'data-plants': String(visible.length) },
+        rows.map((entry) =>
+          h(
+            'span',
+            {
+              key: 'bed' + entry.plant.seq + '-' + entry.index,
+              className: 'cg-bed-plant cg-plant' + (flying ? ' cg-bed-fly' : ''),
+              'data-kind': entry.plant.kind,
+              style: {
+                left: entry.x.toFixed(2) + '%',
+                bottom: (entry.row === 1 ? 1 : 3) + 'px',
+                '--cg-scale': entry.scale.toFixed(3),
+                '--cg-sway-dur': (5 + (entry.seed % 260) / 100).toFixed(2) + 's',
+                '--cg-sway-delay': '-' + ((entry.seed % 460) / 100).toFixed(2) + 's',
+                zIndex: entry.row === 1 ? 2 : 1,
+                ...(flying ? { animationDelay: (entry.index % 7) * 45 + 'ms' } : {}),
+              },
+            },
+            h(
+              'span',
+              { className: 'cg-bed-sway' },
+              h(
+                'svg',
+                { viewBox: '-12 -24 24 27', width: 26, height: 29, 'aria-hidden': true },
+                h(PlantGlyph, { kind: entry.plant.kind }),
+              ),
+            ),
           ),
-
         ),
+        visible.length === 0 && !flying
+          ? h(
+              'svg',
+              { className: 'cg-bed-mound', viewBox: '0 0 46 14', 'aria-hidden': true },
+              h('ellipse', { cx: 23, cy: 11, rx: 13, ry: 3, fill: 'var(--cg-soil-2)', opacity: 0.65 }),
+              h('path', { d: 'M11 11 q12 -8 24 0 z', fill: 'var(--cg-soil-2)' }),
+              h('circle', { cx: 20, cy: 7.4, r: 1, fill: 'var(--cg-amber)' }),
+              h('circle', { cx: 25, cy: 6.8, r: 0.9, fill: 'var(--cg-amber)' }),
+            )
+          : null,
       )
+    }
+
+    /**
+     * Build the ambient overlay markup: ivy climbing the conversation's edges
+     * and dandelion seeds drifting across it. Pure string builder so the render
+     * tests can check it without a DOM.
+     *
+     * @param rect - visible conversation rectangle in CSS pixels.
+     * @param options - lifetime ivy count, current dandelions in the field, mode.
+     * @returns an HTML string for the fixed, pointer-events-none overlay.
+     */
+    function buildOverlayMarkup(rect, options) {
+      const source = rect !== null && typeof rect === 'object' ? rect : {}
+      const width = Math.max(1, Math.round(num(source.width) || 1000))
+      const height = Math.max(1, Math.round(num(source.height) || 800))
+      const ivy = Math.max(0, Math.floor(num(options === undefined ? 0 : options.ivy)))
+      const dandelions = Math.max(0, Math.floor(num(options === undefined ? 0 : options.dandelions)))
+      const reduced = options !== undefined && options !== null && options.reduced === true
+      const segments = Math.min(10, Math.ceil(ivy / 40))
+      const seedCount = reduced ? 0 : Math.min(30, Math.ceil(dandelions * 2.5))
+      if (segments === 0 && seedCount === 0) return ''
+      const span = Math.max(90, (height - 140) / Math.max(segments, 1))
+      let vines = ''
+      for (let i = 0; i < segments; i += 1) {
+        const side = i % 2 === 0 ? 1 : -1
+        const x = side > 0 ? width - 10 : 10
+        const y = height - 64 - i * span
+        const dir = side > 0 ? -1 : 1
+        const delay = i * 220
+        const d =
+          'M' + x + ' ' + y +
+          ' C' + (x + dir * 24) + ' ' + (y - 30) +
+          ', ' + (x - dir * 18) + ' ' + (y - 58) +
+          ', ' + (x + dir * 14) + ' ' + (y - 92) +
+          ' S' + (x - dir * 10) + ' ' + (y - 118) +
+          ', ' + (x + dir * 8) + ' ' + (y - 140)
+        vines += '<path class="cg-vine" pathLength="1" d="' + d + '" style="animation-delay:' + delay + 'ms"/>'
+        const tendril =
+          'M' + (x + dir * 6) + ' ' + (y - 34) +
+          ' q' + (dir * -16) + ' -10 ' + (dir * -6) + ' -24'
+        vines += '<path class="cg-vine cg-vine-tendril" pathLength="1" d="' + tendril + '" style="animation-delay:' + (delay + 160) + 'ms"/>'
+        for (let leaf = 0; leaf < 5; leaf += 1) {
+          const lx = x + dir * (10 + (leaf % 2 === 0 ? 6 : -4)) + (leaf * dir * 2)
+          const ly = y - 16 - leaf * 24
+          const rot = (leaf * 71 + i * 43) % 360
+          const size = 3.4 + (leaf % 3) * 0.6
+          vines +=
+            '<ellipse class="cg-vine-leaf" cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) +
+            '" rx="' + size.toFixed(1) + '" ry="' + (size / 2).toFixed(1) +
+            '" transform="rotate(' + rot + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) +
+            ')" style="animation-delay:' + (delay + 240 + leaf * 90) + 'ms"/>'
+        }
+      }
+      let seeds = ''
+      for (let i = 0; i < seedCount; i += 1) {
+        const seed = hashNum(i * 97 + 13)
+        const left = 5 + ((seed % 1000) / 1000) * 90
+        const top = 30 + ((hashNum(seed) % 1000) / 1000) * 60
+        const duration = (14 + (seed % 120) / 8).toFixed(1)
+        const delay = '-' + ((seed % 260) / 10).toFixed(1) + 's'
+        const dx = (hashNum(seed >> 4) % 220) - 110
+        seeds +=
+          '<span class="cg-overlay-seed" style="left:' + left.toFixed(1) + '%;top:' + top.toFixed(1) +
+          '%;animation-duration:' + duration + 's;animation-delay:' + delay + ';--cg-dx:' + dx + 'px">' +
+          '<svg viewBox="0 0 14 18" width="13" height="17" aria-hidden="true">' +
+          '<path d="M7 17 V7" stroke="var(--cg-leaf)" stroke-width=".9" stroke-linecap="round"/>' +
+          '<circle cx="7" cy="5" r="2.9" fill="var(--cg-dandelion)" opacity=".95"/>' +
+          '<path d="M7 5 l-3.2 -2.7 M7 5 l3.2 -2.7 M7 5 l0 -3.6 M7 5 l-2.4 -0.2 M7 5 l2.4 -0.2" stroke="var(--cg-dandelion)" stroke-width=".6" stroke-linecap="round" opacity=".9"/>' +
+          '</svg></span>'
+      }
+      return (
+        '<svg class="cg-overlay-vines" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" aria-hidden="true">' +
+        vines +
+        '</svg>' +
+        seeds
+      )
+    }
+
+    /**
+     * Ambient garden effects over the conversation: ivy climbs in from the
+     * edges as internal steps accumulate, and dandelion seeds drift across the
+     * chat while dandelions stand in the field. Mounted to document.body so the
+     * composer's containing block cannot clip it; pointer-events stay off.
+     */
+    function GardenOverlay(props) {
+      const garden = props.garden
+      const season = props.season
+      const ivy = Math.max(0, Math.floor(num(garden.counts.ivy)))
+      const dandelions = Math.max(0, Math.floor(num(garden.counts.dandelion)))
+      const hostRef = React.useRef(null)
+      const dataRef = React.useRef({ ivy, dandelions })
+      dataRef.current = { ivy, dandelions }
+
+      React.useEffect(() => {
+        if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.body) return undefined
+        let root = document.querySelector('.cg-overlay-root')
+        const created = root === null
+        if (root === null) {
+          root = document.createElement('div')
+          root.className = 'cg-overlay-root cg-root'
+          document.body.appendChild(root)
+        }
+        hostRef.current = root
+        const paint = () => {
+          const node = document.querySelector('[data-conversation-region="chat"]')
+          const rect = node !== null && typeof node.getBoundingClientRect === 'function' ? node.getBoundingClientRect() : null
+          const box = {
+            left: rect === null ? 0 : Math.max(0, rect.left),
+            top: rect === null ? 0 : Math.max(0, rect.top),
+            width: rect === null ? window.innerWidth : rect.width,
+            height: rect === null ? window.innerHeight : rect.height,
+          }
+          root.style.left = box.left + 'px'
+          root.style.top = box.top + 'px'
+          root.style.width = box.width + 'px'
+          root.style.height = box.height + 'px'
+          const latest = dataRef.current
+          root.innerHTML = buildOverlayMarkup(box, { ivy: latest.ivy, dandelions: latest.dandelions })
+        }
+        paint()
+        let timer = 0
+        const schedule = () => {
+          if (timer !== 0) return
+          timer = setTimeout(() => {
+            timer = 0
+            paint()
+          }, 180)
+        }
+        window.addEventListener('resize', schedule)
+        let observer = null
+        try {
+          if (typeof ResizeObserver === 'function') {
+            observer = new ResizeObserver(schedule)
+            const node = document.querySelector('[data-conversation-region="chat"]')
+            if (node !== null) observer.observe(node)
+          }
+        } catch {
+          observer = null
+        }
+        return () => {
+          window.removeEventListener('resize', schedule)
+          if (timer !== 0) clearTimeout(timer)
+          if (observer !== null) observer.disconnect()
+          if (created && root.parentNode !== null) root.parentNode.removeChild(root)
+        }
+      }, [])
+
+      React.useEffect(() => {
+        const root = hostRef.current
+        if (root === null || root === undefined) return
+        dataRef.current = { ivy, dandelions }
+        const box = { width: root.clientWidth || 1000, height: root.clientHeight || 800 }
+        root.innerHTML = buildOverlayMarkup(box, { ivy, dandelions })
+      }, [ivy, dandelions, season.key])
+
+      return null
     }
 
     /** Enso season mark used by the composer strip and the panel header. */
@@ -1274,7 +1559,7 @@ window.__ModuleLoader__.load({
     }
 
     // ---- dock widget ---------------------------------------------------
-    /** Small garden living in the composer dock. */
+    /** Small garden living on the composer. */
     function GardenDock(props) {
       const useProjection = typeof props.useProjection === 'function' ? props.useProjection : () => undefined
       const garden = normalizeGarden(useProjection('garden'))
@@ -1296,44 +1581,74 @@ window.__ModuleLoader__.load({
 
       return h(
         'div',
-        {
-          className: 'cg-root cg-dock',
-          'data-season': season.key,
-          role: 'button',
-          tabIndex: 0,
-          title: label,
-          'aria-label': label,
-          onClick: () => {
-            if (openGarden !== null) openGarden()
-          },
-          onKeyDown,
-        },
+        { className: 'cg-root cg-dock-row', 'data-season': season.key },
         h('style', null, CSS),
-        h(SeasonMark, { season, tr }),
-        h(DockField, { garden, season, flash, tr }),
         h(
-          'span',
-          { className: 'cg-dock-stats' },
+          'div',
+          {
+            className: 'cg-dock',
+            role: 'button',
+            tabIndex: 0,
+            title: label,
+            'aria-label': label,
+            onClick: () => {
+              if (openGarden !== null) openGarden()
+            },
+            onKeyDown,
+          },
+          h(
+            'svg',
+            { className: 'cg-dock-soil', viewBox: '0 0 100 12', preserveAspectRatio: 'none', 'aria-hidden': true },
+            h('path', {
+              d: 'M0 4.4 Q18 1.4 36 4.2 T72 4 T100 3.4 L100 12 L0 12 Z',
+              fill: 'var(--cg-soil)',
+              opacity: 0.95,
+            }),
+            h('path', {
+              d: 'M0 8 Q30 5.6 60 8 T100 7.6 L100 12 L0 12 Z',
+              fill: 'var(--cg-soil-2)',
+              opacity: 0.4,
+            }),
+            season.key === 'winter'
+              ? h('path', {
+                  d: 'M0 3.6 Q25 0.8 50 3.4 T100 2.8 L100 6.6 Q50 9.4 0 6.2 Z',
+                  fill: 'var(--cg-snow)',
+                  opacity: 0.8,
+                })
+              : null,
+          ),
+          h(SeasonMark, { season, tr }),
+          h(GardenBed, { garden, season, flash, tr }),
           h(
             'span',
-            { className: 'cg-stat', key: 'seeds' },
-            h('b', null, String(shownSeeds)),
-            h('span', null, tr('dock.seeds')),
-          ),
-          h(
-            'span',
-            { className: 'cg-stat', key: 'harvests' },
-            h('b', null, String(garden.harvestCount)),
-            h('span', null, tr('dock.harvests')),
-          ),
-        ),
-        flash !== null
-          ? h(
+            { className: 'cg-dock-stats' },
+            h(
               'span',
-              { className: 'cg-gain', key: 'gain' + flash.key },
-              tr('harvest.gained').replace('{n}', String(flash.seeds)),
-            )
-          : null,
+              { className: 'cg-stat', key: 'seeds' },
+              h('b', null, String(shownSeeds)),
+              h('span', null, tr('dock.seeds')),
+            ),
+            h(
+              'span',
+              { className: 'cg-stat', key: 'harvests' },
+              h('b', null, String(garden.harvestCount)),
+              h('span', null, tr('dock.harvests')),
+            ),
+          ),
+          h(
+            'span',
+            { className: 'cg-dock-caption' },
+            tr('season.' + season.key) + ' · ' + tr('season.' + season.key + 'Line'),
+          ),
+          flash !== null
+            ? h(
+                'span',
+                { className: 'cg-gain', key: 'gain' + flash.key },
+                tr('harvest.gained').replace('{n}', String(flash.seeds)),
+              )
+            : null,
+        ),
+        h(GardenOverlay, { garden, season, tr }),
       )
     }
 
@@ -1605,10 +1920,10 @@ window.__ModuleLoader__.load({
     const CSS = [
       // palette + root
       '.cg-root{--cg-serif:"Iowan Old Style","Palatino Linotype","Songti SC","Noto Serif SC","Source Han Serif SC",Georgia,serif;--cg-paper:#f7f2e7;--cg-paper-2:#efe7d7;--cg-ink:#3b3a34;--cg-ink-2:#6d685b;--cg-ink-3:#9a9383;--cg-line:rgba(59,58,52,.13);--cg-line-2:rgba(59,58,52,.08);--cg-band:#f3ecdd;',
-      '--cg-moss:#84977a;--cg-leaf:#7d9a74;--cg-leaf-deep:#5c7a5b;--cg-sprout:#a4bd7f;--cg-grass:#7fa08a;--cg-bamboo:#6f9377;--cg-amber:#c1965c;--cg-weed:#a98a5f;--cg-blossom:#e2bcba;--cg-water:#9db9c1;--cg-snow:#e6edee;--cg-moon:#e8e3d2;--cg-sun:#e6cfa4;--cg-stone:#a8a496;--cg-soil:#8b7b5f;--cg-soil-2:#6f6249;--cg-soil-line:#4f4534;',
+      '--cg-moss:#84977a;--cg-leaf:#7d9a74;--cg-leaf-deep:#5c7a5b;--cg-sprout:#a4bd7f;--cg-grass:#7fa08a;--cg-bamboo:#6f9377;--cg-amber:#c1965c;--cg-weed:#a98a5f;--cg-blossom:#e2bcba;--cg-water:#9db9c1;--cg-snow:#e6edee;--cg-moon:#e8e3d2;--cg-sun:#e6cfa4;--cg-stone:#a8a496;--cg-soil:#8b7b5f;--cg-soil-2:#6f6249;--cg-soil-line:#4f4534;--cg-rice:#c8a55e;--cg-ivy:#6f8f62;--cg-dandelion:#cfc9b4;--cg-mushroom:#b07a5e;--cg-mushroom-stem:#e9dfcc;--cg-lotus:#e3b9c0;',
       '--cg-sky-1:#f2ead8;--cg-sky-2:#e8ddc6;--cg-hill:#c8c2a8;--cg-hill-2:#b7b39a;--cg-seal:#b0554a}',
       'body[data-ds-dark-theme] .cg-root{--cg-paper:#191d1b;--cg-paper-2:#202623;--cg-ink:#d9d5c9;--cg-ink-2:#a8a397;--cg-ink-3:#77746a;--cg-line:rgba(217,213,201,.16);--cg-line-2:rgba(217,213,201,.08);--cg-band:#1d2320;',
-      '--cg-moss:#7c8f72;--cg-leaf:#7f9878;--cg-leaf-deep:#5f7c60;--cg-sprout:#9cb578;--cg-grass:#7a9a85;--cg-bamboo:#77957b;--cg-amber:#c09a60;--cg-weed:#a58c63;--cg-blossom:#b9948f;--cg-water:#7f9fa8;--cg-snow:#cfd9dc;--cg-moon:#d8d5c8;--cg-sun:#d9c49f;--cg-stone:#8f8c80;--cg-soil:#5d5442;--cg-soil-2:#463f30;--cg-soil-line:#2c271d;',
+      '--cg-moss:#7c8f72;--cg-leaf:#7f9878;--cg-leaf-deep:#5f7c60;--cg-sprout:#9cb578;--cg-grass:#7a9a85;--cg-bamboo:#77957b;--cg-amber:#c09a60;--cg-weed:#a58c63;--cg-blossom:#b9948f;--cg-water:#7f9fa8;--cg-snow:#cfd9dc;--cg-moon:#d8d5c8;--cg-sun:#d9c49f;--cg-stone:#8f8c80;--cg-soil:#5d5442;--cg-soil-2:#463f30;--cg-soil-line:#2c271d;--cg-rice:#c2a165;--cg-ivy:#78996c;--cg-dandelion:#b9b6a8;--cg-mushroom:#a96f55;--cg-mushroom-stem:#c9c0ad;--cg-lotus:#cfa7ad;',
       '--cg-sky-1:#1c2320;--cg-sky-2:#232b27;--cg-hill:#3a463d;--cg-hill-2:#333d36;--cg-seal:#a8564c}',
       // scene seasonal palettes
       '.cg-scene{--cg-sky-1:#f2ead8;--cg-sky-2:#e8ddc6;--cg-hill:#c8c2a8;--cg-hill-2:#b7b39a;--cg-soil:#8b7b5f;--cg-soil-2:#6f6249;--cg-soil-line:#4f4534}',
@@ -1640,21 +1955,38 @@ window.__ModuleLoader__.load({
       '@keyframes cg-drift{0%{transform:translate(0,-6px);opacity:0}12%{opacity:var(--cg-po,.6)}82%{opacity:var(--cg-po,.6)}100%{transform:translate(12px,40px);opacity:0}}',
       '@keyframes cg-banner{0%{opacity:0;transform:translateY(-3px)}12%{opacity:1;transform:none}78%{opacity:1}100%{opacity:0;transform:translateY(-2px)}}',
       '@keyframes cg-gain{0%{opacity:0;transform:translateY(5px)}16%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translateY(-9px)}}',
+      '@keyframes cg-bed-fly{0%{opacity:1}55%{opacity:.85}100%{transform:translateX(-50%) translate(26px,-46px) scale(calc(var(--cg-scale,1) * .35));opacity:0}}',
+      '@keyframes cg-vine-draw{to{stroke-dashoffset:0}}',
+      '@keyframes cg-leaf-in{0%{opacity:0}100%{opacity:.55}}',
+      '@keyframes cg-seed-drift{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:.72}55%{transform:translate(calc(var(--cg-dx,30px) * .55),-46vh) rotate(160deg)}100%{transform:translate(var(--cg-dx,30px),-96vh) rotate(320deg);opacity:0}}',
       // dock
-      '.cg-dock{display:inline-flex;align-items:center;gap:6px;height:27px;box-sizing:border-box;padding:0 9px 0 2px;margin:0;border:0;border-radius:999px;background:transparent;color:var(--dsw-alias-label-secondary,#6b6b6b);font:inherit;text-align:left;cursor:pointer;transition:background .18s ease}',
-      '.cg-dock:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.06))}',
+      '.cg-dock-row{display:flex;align-items:flex-end;justify-content:flex-start;box-sizing:border-box;width:calc(100% - var(--dsh-composer-side-clearance,20px) - var(--dsh-composer-side-clearance,20px));max-width:var(--dsh-composer-card-max-width,820px);margin:0 auto calc(0px - var(--dsh-composer-stack-gap,6px) - 3px);padding:0;flex:none}',
+      '.cg-dock{position:relative;display:flex;align-items:flex-end;gap:8px;width:100%;height:44px;box-sizing:border-box;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:var(--dsw-alias-label-secondary,#6b6b6b);font:inherit;text-align:left;cursor:pointer;max-width:100%}',
+      '.cg-dock-soil{position:absolute;left:0;right:0;bottom:0;display:block;width:100%;height:12px;pointer-events:none}',
+      '.cg-dock:hover .cg-dock-caption{color:var(--cg-ink)}',
       '.cg-dock:focus-visible{outline:1.5px solid var(--dsw-alias-brand-primary,#4c6ef5);outline-offset:2px}',
-      '.cg-season-mark{display:inline-flex;align-items:center;flex:none}',
-      '.cg-enso{width:22px;height:22px;border-radius:50%;border:1.4px solid var(--cg-ink-3);border-right-color:transparent;display:grid;place-items:center;font-family:var(--cg-serif);font-size:10.5px;line-height:1;color:var(--cg-ink-2);transform:rotate(-14deg);flex:none}',
+      '.cg-season-mark{display:inline-flex;align-items:center;flex:none;padding-bottom:13px;z-index:2}',
+      '.cg-enso{width:24px;height:24px;border-radius:50%;border:1.4px solid var(--cg-ink-3);border-right-color:transparent;display:grid;place-items:center;font-family:var(--cg-serif);font-size:11px;line-height:1;color:var(--cg-ink-2);transform:rotate(-14deg);flex:none}',
       '.cg-season-mark-label{font-size:9.5px;letter-spacing:.14em;color:var(--cg-ink-3);font-family:var(--cg-serif)}',
-      '.cg-dock-field{position:relative;width:136px;height:29px;flex:none;border-radius:8px;overflow:hidden;border:1px solid var(--cg-line-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}',
-      '.cg-dock-field .cg-field{display:block;width:100%;height:100%}',
-      '.cg-dock-stats{display:inline-flex;align-items:baseline;gap:8px;flex:none;font-variant-numeric:tabular-nums;white-space:nowrap}',
+      '.cg-bed{position:relative;flex:1 1 auto;min-width:0;height:44px;overflow:visible;z-index:1}',
+      '.cg-bed-ground{position:absolute;left:0;right:0;bottom:0;display:block;width:100%;height:11px;pointer-events:none}',
+      '.cg-bed-plant{position:absolute;bottom:12px;display:block;line-height:0;transform:translateX(-50%) scale(var(--cg-scale,1));transform-origin:50% 100%;pointer-events:none}',
+      '.cg-bed-sway{display:block;transform-origin:50% 100%;animation:cg-sway var(--cg-sway-dur,6s) ease-in-out infinite;animation-delay:var(--cg-sway-delay,0s)}',
+      '.cg-bed-plant.cg-bed-fly{animation:cg-bed-fly 1s cubic-bezier(.45,0,.3,1) forwards}',
+      '.cg-bed-mound{position:absolute;left:50%;bottom:12px;width:46px;height:14px;transform:translateX(-50%);pointer-events:none;opacity:.9}',
+      '.cg-dock-stats{display:inline-flex;align-items:baseline;gap:8px;flex:none;font-variant-numeric:tabular-nums;white-space:nowrap;padding-bottom:14px;z-index:2}',
       '.cg-stat{display:inline-flex;align-items:baseline;gap:3px}',
       '.cg-stat b{font-size:11px;font-weight:600;color:var(--cg-ink)}',
       '.cg-stat span{font-size:7.5px;letter-spacing:.1em;color:var(--cg-ink-3)}',
-      '.cg-gain{font-size:9.5px;color:var(--cg-amber);font-variant-numeric:tabular-nums;animation:cg-gain 2.3s ease forwards;white-space:nowrap}',
-      '.cg-dock-caption{display:none}',
+      '.cg-gain{font-size:9.5px;color:var(--cg-amber);font-variant-numeric:tabular-nums;animation:cg-gain 2.3s ease forwards;white-space:nowrap;padding-bottom:14px;z-index:2}',
+      '.cg-dock-caption{flex:none;font-size:10.5px;letter-spacing:.04em;color:var(--cg-ink-2);font-family:var(--cg-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;padding-bottom:14px;z-index:2}',
+      // ambient conversation overlay
+      '.cg-overlay-root{position:fixed;pointer-events:none;z-index:4;overflow:hidden;opacity:.9}',
+      '.cg-overlay-vines{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none}',
+      '.cg-vine{fill:none;stroke:var(--cg-ivy);stroke-width:1.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:cg-vine-draw 2.6s ease-out forwards;opacity:.6}',
+      '.cg-vine-tendril{stroke-width:.9;opacity:.4}',
+      '.cg-vine-leaf{fill:var(--cg-ivy);opacity:0;animation:cg-leaf-in 1.8s ease-out forwards}',
+      '.cg-overlay-seed{position:absolute;display:block;line-height:0;opacity:0;animation-name:cg-seed-drift;animation-timing-function:linear;animation-iteration-count:infinite}',
       // panel
       '.cg-panel{display:flex;flex-direction:column;gap:15px;width:100%;box-sizing:border-box;padding:16px 15px 26px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:12px;line-height:1.55;background:linear-gradient(180deg,color-mix(in srgb,var(--cg-paper-2) 55%,transparent),transparent 260px)}',
       '.cg-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}',
@@ -1703,7 +2035,8 @@ window.__ModuleLoader__.load({
       '.cg-tab-title{display:inline-flex;align-items:center;gap:5px;font-size:11.5px}',
       '.cg-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--cg-moss, #84977a);box-shadow:0 0 0 2.5px color-mix(in srgb,currentColor 12%,transparent)}',
       // small screens and reduced motion
-      '@media (prefers-reduced-motion: reduce){.cg-sway,.cg-plant.cg-sway,.cg-plant.cg-fly,.cg-plant .cg-grow,.cg-particle,.cg-gain,.cg-scene-banner,.cg-balance .cg-gain{animation:none !important}.cg-plant.cg-fly{opacity:0}}',
+      '@media (max-width: 1120px){.cg-dock-caption{display:none}}',
+      '@media (prefers-reduced-motion: reduce){.cg-sway,.cg-bed-sway,.cg-plant.cg-sway,.cg-plant.cg-fly,.cg-plant .cg-grow,.cg-particle,.cg-gain,.cg-scene-banner,.cg-balance .cg-gain,.cg-bed-plant.cg-bed-fly{animation:none !important}.cg-bed-plant.cg-bed-fly,.cg-plant.cg-fly{opacity:0}.cg-vine{stroke-dashoffset:0;animation:none;opacity:.5}.cg-vine-leaf{animation:none;opacity:.5}.cg-overlay-seed{display:none}}',
     ].join('')
 
     // ---- plugin --------------------------------------------------------
@@ -1727,12 +2060,12 @@ window.__ModuleLoader__.load({
           }
         }
 
-        ctx.slots.inject('conversation.composer.dock', () =>
+        ctx.slots.inject('conversation.input.dock', () =>
           ctx.slots.register(
             {
-              name: 'conversation.composer.dock',
+              name: 'conversation.input.dock',
               id: 'context-garden',
-              order: 2,
+              order: 4,
               locale: NS,
               inject: () => ({ openGardenTab }),
             },
@@ -1782,6 +2115,9 @@ window.__ModuleLoader__.load({
         GardenDock,
         GardenPanel,
         GardenField,
+        GardenBed,
+        GardenOverlay,
+        buildOverlayMarkup,
         PlantGlyph,
         SeasonRing,
         GardenTitle,

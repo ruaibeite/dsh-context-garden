@@ -17,8 +17,26 @@
  * same garden (replay-stable).
  */
 
-/** The six plant kinds, in the stable order the UI renders them. */
-export const KINDS = ['cactus', 'flower', 'weed', 'bamboo', 'grass', 'sprout']
+/**
+ * The eleven plant kinds, in the stable order the UI renders them.
+ *
+ * `ivy` marks an internal tool-only step, `dandelion` a web excursion,
+ * `mushroom` coordination/planning, `rice` documents/presentation, and
+ * `lotus` the single plant left in the field after every harvest.
+ */
+export const KINDS = [
+  'cactus',
+  'flower',
+  'weed',
+  'bamboo',
+  'rice',
+  'grass',
+  'sprout',
+  'ivy',
+  'dandelion',
+  'mushroom',
+  'lotus',
+]
 
 /** Plants kept in the current field; older ones fall off the bed (still counted). */
 export const FIELD_CAP = 240
@@ -32,6 +50,9 @@ export const MAX_CALLS = 80
 /** Longest plant weight: 4000 characters of context per plant at most. */
 const MAX_WEIGHT = 4000
 
+/** Fixed weight of the lotus that blooms in the field after every harvest. */
+const LOTUS_WEIGHT = 400
+
 const num = (value) => (typeof value === 'number' && Number.isFinite(value) ? value : 0)
 
 const clamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value))
@@ -42,14 +63,14 @@ const toCount = (value) => {
   return n >= 0 ? Math.floor(n) : 0
 }
 
-/** A zeroed counter object for the six kinds. */
+/** A zeroed counter object for the eleven kinds. */
 function emptyKindCounts() {
   const counts = {}
   for (const kind of KINDS) counts[kind] = 0
   return counts
 }
 
-/** Rebuild a six-kind counter object from a stored/corrupted value. */
+/** Rebuild an eleven-kind counter object from a stored/corrupted value. */
 function parseKindCounts(value) {
   const source = value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {}
   const counts = {}
@@ -98,6 +119,12 @@ function hasCodeFence(content) {
   return textBlocksOf(content).some((text) => text.includes('```'))
 }
 
+/** Whether any block in the content is a tool call (an internal step). */
+function hasToolCall(content) {
+  if (!Array.isArray(content)) return false
+  return content.some((block) => block !== null && typeof block === 'object' && block.type === 'tool-call')
+}
+
 /**
  * Weight of a planted message: one plant per ~4 characters, clamped to 1..4000
  * so a tiny tool result still plants something and a huge paste cannot grow an
@@ -110,9 +137,11 @@ function weightOf(content) {
 /**
  * Fold one tool name into the kind of plant its result grows.
  *
- * Mapping (SPEC §4.2): code -> cactus, documents/presentation -> bamboo,
+ * Mapping (SPEC §4.2 + amendment): code -> cactus, documents/presentation ->
+ * rice, web excursions -> dandelion, coordination/planning -> mushroom,
  * read/search -> grass, anything unknown -> grass. `present` is a document
- * tool, not a code tool.
+ * tool, not a code tool; `ask_user` is coordination, not reading. The order of
+ * the checks matters: code first, then documents, web, coordination, reads.
  *
  * @param name - the `tool/call` name.
  * @returns one of {@link KINDS}.
@@ -123,7 +152,9 @@ export function categoryOfTool(name) {
   if (/^(run_code|bash|pwsh|terminal|shell|exec|write|edit|apply_patch|str_replace|fs_write|fs_edit|notebook|jobs|job_|workflow|ralph|plugin_manager|worktree)/i.test(tool)) {
     return 'cactus'
   }
-  if (/(docx|pptx|xlsx|pdf|office|document|present)/i.test(tool)) return 'bamboo'
+  if (/(docx|pptx|xlsx|pdf|office|document|present)/i.test(tool)) return 'rice'
+  if (/^(web_search|web_fetch|websearch|webfetch|fetch|browse)/i.test(tool)) return 'dandelion'
+  if (/^(todo_|todo|plan|schedule|subagent|team_|team|task|goal|ask_user)/i.test(tool)) return 'mushroom'
   if (/^(read|glob|grep|ls\b|find\b|skill|session_search|session_query|session_event|workspace|todo_read|ask_user|web_search|web_fetch|fetch|browse)/i.test(tool)) {
     return 'grass'
   }
@@ -134,8 +165,9 @@ export function categoryOfTool(name) {
  * Seed value of one harvested plant.
  *
  * `clamp(1 + floor(w / 800), 1, 5)` plus a species bonus: flower +2,
- * cactus +1, bamboo +1. Range 1..7. Tolerant of a malformed plant so a
- * corrupted row can never seed the economy with nonsense.
+ * lotus +3, cactus / bamboo / rice / dandelion / mushroom +1, and ivy / weed /
+ * grass / sprout +0. Range 1..8. Tolerant of a malformed plant so a corrupted
+ * row can never seed the economy with nonsense.
  *
  * @param plant - `{ kind, w }` (extra fields ignored).
  * @returns seed value.
@@ -143,7 +175,14 @@ export function categoryOfTool(name) {
 export function seedValue(plant) {
   const source = plant !== null && typeof plant === 'object' && !Array.isArray(plant) ? plant : {}
   const base = clamp(1 + Math.floor(num(source.w) / 800), 1, 5)
-  const bonus = source.kind === 'flower' ? 2 : source.kind === 'cactus' || source.kind === 'bamboo' ? 1 : 0
+  const kind = source.kind
+  const bonus = kind === 'flower'
+    ? 2
+    : kind === 'lotus'
+      ? 3
+      : kind === 'cactus' || kind === 'bamboo' || kind === 'rice' || kind === 'dandelion' || kind === 'mushroom'
+        ? 1
+        : 0
   return base + bonus
 }
 
@@ -196,8 +235,10 @@ function plantInto(state, kind, content, event, isError) {
 }
 
 /**
- * Harvest the current field into seed currency and the season diary.
- * An empty field still records the harvest (n = 0, seeds = 0).
+ * Harvest the current field into seed currency and the season diary, then let
+ * exactly one lotus bloom in the emptied field. An empty field still records
+ * the harvest (n = 0, seeds = 0) and still grows the lotus. The single lotus
+ * is what the client keys its winter rule on (`plants.length < 2`).
  */
 function harvestAt(state, event) {
   const plants = Array.isArray(state.plants) ? state.plants : []
@@ -221,16 +262,26 @@ function harvestAt(state, event) {
     counts,
   }]
   if (harvests.length > HARVEST_CAP) harvests.splice(0, harvests.length - HARVEST_CAP)
+  const time = num(event.time)
+  // The field is not left bare: a lotus blooms where the season ended.
+  const lotus = { seq: toCount(event.seq), t: time, kind: 'lotus', w: LOTUS_WEIGHT }
+  const lifetimeCounts = parseKindCounts(state.counts)
+  lifetimeCounts.lotus = toCount(lifetimeCounts.lotus) + 1
+  const firstPlantAt = toCount(state.firstPlantAt)
   return {
     ...state,
-    plants: [],
+    plants: [lotus],
+    counts: lifetimeCounts,
+    planted: toCount(state.planted) + 1,
     harvests,
     harvestCount: toCount(state.harvestCount) + 1,
     harvested: toCount(state.harvested) + plants.length,
     seeds: toCount(state.seeds) + seeds,
     seedsByKind,
     harvestedByKind,
-    lastHarvestAt: num(event.time),
+    lastHarvestAt: time,
+    lastPlantAt: time,
+    firstPlantAt: firstPlantAt === 0 ? time : firstPlantAt,
   }
 }
 
@@ -268,14 +319,21 @@ function foldToolResult(state, event, data) {
   return plantInto(state, kind, content, event, isError)
 }
 
-/** `assistant/message`: only steps with real assistant text plant (not reasoning). */
+/**
+ * `assistant/message`: real assistant text plants bamboo (or a cactus for
+ * code-heavy answers); a text-less step that calls a tool grows an ivy (the
+ * internal plumbing of an answer); a reasoning-only step plants nothing.
+ */
 function foldAssistant(state, event, data) {
   const message = messageOf(data)
   const content = Array.isArray(message.content) || typeof message.content === 'string' ? message.content : []
   const text = textBlocksOf(content).join('\n')
-  if (text.trim() === '') return state
-  const kind = text.includes('```') ? 'cactus' : 'bamboo'
-  return plantInto(state, kind, content, event, false)
+  if (text.trim() !== '') {
+    const kind = text.includes('```') ? 'cactus' : 'bamboo'
+    return plantInto(state, kind, content, event, false)
+  }
+  if (hasToolCall(content)) return plantInto(state, 'ivy', content, event, false)
+  return state
 }
 
 /** `user/message`: image -> flower, code -> cactus, otherwise a sprout. */
@@ -361,8 +419,8 @@ function parseCallNames(value) {
  * Rebuild a validated state object from a stored/corrupted value.
  *
  * Must swallow `undefined`, older versions, and arbitrary garbage: numbers are
- * clamped to non-negative integers, arrays are filtered and truncated, the six
- * kind counters are filled from defaults, and missing fields get defaults.
+ * clamped to non-negative integers, arrays are filtered and truncated, the
+ * eleven kind counters are filled from defaults, and missing fields get defaults.
  * Never throws.
  *
  * @param value - anything previously stored for the `garden` projection.
@@ -430,7 +488,7 @@ export function parseGardenView(value) {
 /** The `garden` projection registered with the host. */
 export const GARDEN_PROJECTION = {
   key: 'garden',
-  stateVersion: 1,
+  stateVersion: 2,
   stateSchema: { parse: parseGardenState },
   init: initGardenState,
   apply: foldGarden,

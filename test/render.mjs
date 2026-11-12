@@ -371,6 +371,26 @@ await test('seed milestones unlock the courtyard in order', () => {
   assert.equal(nextUnlockOf(120).key, 'rake')
 })
 
+await test('every plant kind has sprite metadata and bilingual copy', () => {
+  const { moduleExports } = loadClient()
+  const model = moduleExports.__model
+  assert.equal(model.KINDS.length, 11)
+  for (const kind of host.KINDS) {
+    for (const locale of ['zh', 'en']) {
+      assert.equal(typeof model.TEXT[locale]['kind.' + kind], 'string', 'missing kind.' + kind + ' in ' + locale)
+      assert.equal(typeof model.TEXT[locale]['kind.' + kind + 'Mean'], 'string', 'missing mean for ' + kind + ' in ' + locale)
+      assert.ok(model.TEXT[locale]['kind.' + kind].length > 0)
+      assert.ok(model.TEXT[locale]['kind.' + kind + 'Mean'].length > 0)
+    }
+    assert.equal(typeof host.KINDS.indexOf(kind), 'number')
+  }
+  // species introduced in v0.2.0
+  for (const kind of ['rice', 'ivy', 'dandelion', 'mushroom', 'lotus']) {
+    assert.ok(model.TEXT.zh['kind.' + kind], 'new kind missing zh copy: ' + kind)
+    assert.ok(model.TEXT.en['kind.' + kind], 'new kind missing en copy: ' + kind)
+  }
+})
+
 // --------------------------------------------------- dictionaries & i18n
 await test('locale dictionaries are complete and bilingual', () => {
   const { moduleExports } = loadClient()
@@ -401,14 +421,14 @@ await test('locale dictionaries are complete and bilingual', () => {
 })
 
 // -------------------------------------------------------- plugin wiring
-await test('apply registers dock, dictionaries, tab type and tab body', () => {
+await test('apply registers the composer-top dock, dictionaries, tab type and tab body', () => {
   const { moduleExports } = loadClient()
   const { ctx, slotRegistrations, tabTypes, dictionaries } = fakeClientContext()
   moduleExports.apply(ctx)
-  const dock = slotRegistrations.find((entry) => entry.options.name === 'conversation.composer.dock')
-  assert.ok(dock, 'dock slot not registered')
+  const dock = slotRegistrations.find((entry) => entry.options.name === 'conversation.input.dock')
+  assert.ok(dock, 'composer-top dock slot not registered')
   assert.equal(dock.options.id, 'context-garden')
-  assert.equal(dock.options.order, 2)
+  assert.equal(dock.options.order, 4)
   assert.equal(dock.options.locale, '@ruaibeite/dsh-context-garden')
   assert.equal(typeof dock.component, 'function')
   const body = slotRegistrations.find((entry) => entry.options.name === 'sidebar.right.pane.tab')
@@ -431,7 +451,7 @@ await test('dock click and keyboard open the sidebar tab', async () => {
   const { moduleExports } = loadClient()
   const { ctx, slotRegistrations, opened } = fakeClientContext()
   moduleExports.apply(ctx)
-  const dock = slotRegistrations.find((entry) => entry.options.name === 'conversation.composer.dock')
+  const dock = slotRegistrations.find((entry) => entry.options.name === 'conversation.input.dock')
   const props = dock.options.inject()
   assert.equal(typeof props.openGardenTab, 'function')
   props.openGardenTab()
@@ -535,6 +555,55 @@ await test('panel shows the empty field copy and a winter field after a harvest'
   assert.ok(winter.seasons.includes('winter'), 'winter season missing: ' + winter.seasons.join(','))
   assert.ok(winter.joined.includes('雪下藏春'), 'winter copy missing')
   assert.ok(winter.joined.includes('待播种') || winter.classes.some((name) => name.includes('cg-scene')), 'winter field missing')
+})
+
+// ------------------------------------------------- ambient overlay & bed
+await test('overlay builder draws ivy and dandelion seeds, and nothing when empty', () => {
+  const { moduleExports } = loadClient()
+  const build = moduleExports.__model.buildOverlayMarkup
+  assert.equal(build({ width: 900, height: 700 }, { ivy: 0, dandelions: 0 }), '')
+  const empty = build({ width: 900, height: 700 }, {})
+  assert.equal(empty, '')
+  const ivy = build({ width: 900, height: 700 }, { ivy: 400, dandelions: 0 })
+  assert.ok(ivy.includes('cg-overlay-vines'), 'vine layer missing')
+  assert.ok(ivy.includes('cg-vine'), 'vine path missing')
+  assert.ok(ivy.includes('cg-vine-leaf'), 'vine leaves missing')
+  assert.ok(ivy.includes('pathLength="1"'), 'draw-on animation normalization missing')
+  assert.ok(!ivy.includes('cg-overlay-seed'), 'unexpected seeds without dandelions')
+  const seeds = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 8 })
+  const seedCount = (seeds.match(/cg-overlay-seed/g) || []).length
+  assert.equal(seedCount, 20, 'expected 2.5 seeds per dandelion, capped, got ' + seedCount)
+  const capped = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 99 })
+  assert.equal((capped.match(/cg-overlay-seed/g) || []).length, 30)
+  const reduced = build({ width: 900, height: 700 }, { ivy: 400, dandelions: 8, reduced: true })
+  assert.ok(!reduced.includes('cg-overlay-seed'), 'seeds must be hidden under reduced motion')
+  assert.ok(reduced.includes('cg-vine'), 'static vines should remain under reduced motion')
+})
+
+await test('the composer bed draws every kind of plant, full width', async () => {
+  const { moduleExports, runtime } = loadClient()
+  const model = moduleExports.__model
+  const plants = host.KINDS.map((kind, index) => plant(index + 1, kind, 120))
+  const gardenValue = garden({ plants, planted: plants.length })
+  const season = model.seasonOf(gardenValue, PRESSURE_MID)
+  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key }])
+  assert.ok(out.classes.some((name) => name.includes('cg-bed')), 'bed missing')
+  assert.equal(classCount(out, 'cg-plant'), host.KINDS.length, 'every kind should be drawn')
+  const kinds = [...new Set(out.kinds)]
+  for (const kind of host.KINDS) assert.ok(kinds.includes(kind), 'missing bed plant ' + kind)
+  assert.ok(out.seasons.includes('summer'))
+})
+
+await test('a harvested bed in winter shows snow and the lotus summary', async () => {
+  const { moduleExports, runtime } = loadClient()
+  const model = moduleExports.__model
+  const gardenValue = garden({ plants: [plant(9, 'lotus', 400)], planted: 10, harvestCount: 3, seeds: 40 })
+  const season = model.seasonOf(gardenValue, PRESSURE_MID)
+  assert.equal(season.key, 'winter')
+  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key }])
+  assert.ok(out.seasons.includes('winter'))
+  assert.deepEqual([...new Set(out.kinds)], ['lotus'])
+  assert.equal(classCount(out, 'cg-plant'), 1)
 })
 
 // --------------------------------------------------------- harvest flash
