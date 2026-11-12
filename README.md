@@ -58,7 +58,7 @@ Field occupancy comes from the Harness's `contextPressure` (context used / conte
 
 ### The garden strip under the composer
 
-A compact 27 px pill below the input box (`conversation.composer.dock`, order 2, id `context-garden`). On the left, a small enso holding the season character. In the middle, a 136 px mini bed with up to 10 swaying SVG plants. On the right, the seed balance and the harvest count; during a harvest the gain rises beside them. The whole pill is a single button: click it (or press Enter) to open the full garden. An empty bed shows bare soil and a small seed mound; the full panel shows the 待播种 line. When a harvest fires, the plants fly into the warehouse, snow dust drifts, and the seed number rolls — for at most 2.6 s.
+A compact 27 px pill below the input box (`conversation.composer.dock`, order 2, id `context-garden`). On the left, a small enso holding the season character. In the middle, a 136 px mini bed with up to 10 swaying SVG plants. On the right, the seed balance and the harvest count; during a harvest the gain rises beside them. The whole pill is a single button: click it (or press Enter) to open the full garden. An empty bed shows bare soil and a small seed mound; the full panel shows the 待播种 line. When a harvest fires in the dock, the plants fly up and the seed number rolls, with the gain rising beside them; the full panel scene also drifts snow dust — for at most 2.6 s.
 
 ### The Garden tab in the right sidebar
 
@@ -74,6 +74,24 @@ A right-sidebar tab (id `@ruaibeite/dsh-context-garden/garden`, kind `context-ga
 - a footer note stating plainly how the garden is derived.
 
 Both surfaces follow the Harness theme (`body[data-ds-dark-theme]`) and its `--dsw-alias-*` variables; their ambient animations are disabled under `prefers-reduced-motion: reduce`.
+
+## Screenshots
+
+The garden strip under the composer — the season mark, the mini bed, the seed balance and the harvest count:
+
+![The garden strip under the composer](assets/screenshot-1.png)
+
+The Garden tab in summer, light theme:
+
+![The Garden tab in summer, light theme](assets/screenshot-2.png)
+
+The same tab in dark theme:
+
+![The Garden tab in dark theme](assets/screenshot-3.png)
+
+After a harvest: winter, an empty bed under snow, and the 待播种 line in the scene:
+
+![Winter after a harvest: an empty bed under snow](assets/screenshot-4.png)
 
 ## Seeds and the garden
 
