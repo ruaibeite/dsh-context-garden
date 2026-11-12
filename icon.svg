@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Context Garden: a zen enso over a sprout and field rows">
+  <title>Context Garden 🌱</title>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f3e9"/>
+      <stop offset="1" stop-color="#ebe2cf"/>
+    </linearGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ddceb1"/>
+      <stop offset="1" stop-color="#ccb794"/>
+    </linearGradient>
+    <clipPath id="card">
+      <rect x="0" y="0" width="180" height="180"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="180" height="180" fill="url(#paper)"/>
+
+    <!-- far hills, a whisper of sage -->
+    <path d="M4 133 Q46 111 88 127 Q130 143 176 118 L180 180 L0 180 L0 133 Z"
+          fill="#dbe0c5" opacity="0.55"/>
+    <path d="M0 141 Q54 126 104 138 Q146 148 180 136 L180 180 L0 180 Z"
+          fill="#cdd2b6" opacity="0.38"/>
+
+    <!-- enso: one breath, open at the upper right -->
+    <path d="M135.3 54.9 A50 50 0 1 1 107.1 29.0"
+          fill="none" stroke="#3b3a34" stroke-width="7.6"
+          stroke-linecap="round" opacity="0.88"/>
+    <!-- rising sun resting in the enso's opening -->
+    <circle cx="122" cy="40.5" r="7" fill="#d9a868" opacity="0.95"/>
+
+    <!-- pollen drifting in the paper sky -->
+    <circle cx="52" cy="49" r="1.5" fill="#3b3a34" opacity="0.16"/>
+    <circle cx="66" cy="66" r="1.2" fill="#3b3a34" opacity="0.12"/>
+    <circle cx="41" cy="86" r="1.3" fill="#3b3a34" opacity="0.13"/>
+
+    <!-- field bed -->
+    <path d="M4 139 C58 130 122 130 176 139 L180 180 L0 180 Z" fill="url(#soil)"/>
+    <!-- furrows -->
+    <path d="M2 152 C58 145 122 145 178 152" fill="none" stroke="#b3986e" stroke-width="2.6" stroke-linecap="round" opacity="0.62"/>
+    <path d="M2 165 C58 158 122 158 178 165" fill="none" stroke="#b3986e" stroke-width="2.6" stroke-linecap="round" opacity="0.46"/>
+    <!-- small stones along the bed -->
+    <circle cx="36" cy="145" r="2" fill="#ab9a7c" opacity="0.7"/>
+    <circle cx="150" cy="147" r="1.7" fill="#ab9a7c" opacity="0.6"/>
+    <circle cx="128" cy="143" r="1.4" fill="#ab9a7c" opacity="0.5"/>
+
+    <!-- one sprout: shadow, stem, two leaves, a seed in the soil -->
+    <ellipse cx="90" cy="155.5" rx="10" ry="2.6" fill="#a8926c" opacity="0.35"/>
+    <path d="M90 154 C87.5 143 92.5 131 90 115"
+          fill="none" stroke="#5f8259" stroke-width="5.4" stroke-linecap="round"/>
+    <path d="M90 137 C78.5 137 69.5 128.5 70.5 116.5 C83 115 91 123.5 90 137 Z" fill="#8a9a7b"/>
+    <path d="M90 123.5 C103 121.5 111.5 113 110.5 102 C97.5 100.5 89 110 90 123.5 Z" fill="#7ba58a"/>
+    <path d="M89.2 117 C87.4 110.5 88 104.5 90.2 99" fill="none" stroke="#5f8259" stroke-width="3.6" stroke-linecap="round"/>
+    <ellipse cx="90" cy="156" rx="3.4" ry="2.2" fill="#c1965c"/>
+  </g>
+
+  <!-- quiet inner frame: the paper edge of a tea-room scroll -->
+  <rect x="7.5" y="7.5" width="165" height="165" rx="22"
+        fill="none" stroke="#3b3a34" stroke-opacity="0.10" stroke-width="1.4"/>
+</svg>
