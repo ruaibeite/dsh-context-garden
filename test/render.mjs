@@ -558,49 +558,124 @@ await test('panel shows the empty field copy and a winter field after a harvest'
 })
 
 // ------------------------------------------------- ambient overlay & bed
-await test('overlay builder draws ivy and dandelion seeds, and nothing when empty', () => {
+await test('composition sampling keeps every present species in the bed', () => {
   const { moduleExports } = loadClient()
-  const build = moduleExports.__model.buildOverlayMarkup
-  assert.equal(build({ width: 900, height: 700 }, { ivy: 0, dandelions: 0 }), '')
-  const empty = build({ width: 900, height: 700 }, {})
-  assert.equal(empty, '')
-  const ivy = build({ width: 900, height: 700 }, { ivy: 400, dandelions: 0 })
-  assert.ok(ivy.includes('cg-overlay-vines'), 'vine layer missing')
-  assert.ok(ivy.includes('cg-vine'), 'vine path missing')
-  assert.ok(ivy.includes('cg-vine-leaf'), 'vine leaves missing')
-  assert.ok(ivy.includes('pathLength="1"'), 'draw-on animation normalization missing')
-  assert.ok(!ivy.includes('cg-overlay-seed'), 'unexpected seeds without dandelions')
-  const seeds = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 8 })
-  const seedCount = (seeds.match(/cg-overlay-seed/g) || []).length
-  assert.equal(seedCount, 28, 'expected 3.5 seeds per dandelion, capped, got ' + seedCount)
-  const capped = build({ width: 900, height: 700 }, { ivy: 0, dandelions: 99 })
-  assert.equal((capped.match(/cg-overlay-seed/g) || []).length, 56)
-  const reduced = build({ width: 900, height: 700 }, { ivy: 400, dandelions: 8, reduced: true })
-  assert.ok(!reduced.includes('cg-overlay-seed'), 'seeds must be hidden under reduced motion')
-  assert.ok(reduced.includes('cg-vine'), 'static vines should remain under reduced motion')
+  const sample = moduleExports.__model.sampleField
+  const field = []
+  for (let i = 0; i < 120; i += 1) field.push(plant(i + 1, i % 3 === 0 ? 'ivy' : 'cactus', 60))
+  for (let i = 0; i < 4; i += 1) field.push(plant(200 + i, 'flower', 90))
+  for (let i = 0; i < 2; i += 1) field.push(plant(300 + i, 'rice', 120))
+  const picked = sample(field, 26)
+  assert.equal(picked.length, 26)
+  const kinds = new Set(picked.map((value) => value.kind))
+  for (const kind of ['ivy', 'cactus', 'flower', 'rice']) assert.ok(kinds.has(kind), 'species dropped: ' + kind)
+  assert.ok(!kinds.has('lotus'), 'absent species must not appear')
+  // deterministic and in log order
+  const again = sample(field, 26)
+  assert.deepEqual(again.map((value) => value.seq), picked.map((value) => value.seq))
+  for (let i = 1; i < picked.length; i += 1) assert.ok(picked[i - 1].seq <= picked[i].seq, 'not in log order')
+  // capacity smaller than the species count: still newest-first, no crash
+  const tiny = sample(field, 2)
+  assert.equal(tiny.length, 2)
+  assert.equal(sample([], 10).length, 0)
+  assert.equal(sample(field, 0).length, 0)
 })
 
-await test('the composer bed draws every kind of plant, full width', async () => {
+await test('ambient plan stays within budget and follows the season', () => {
+  const { moduleExports } = loadClient()
+  const planOf = moduleExports.__model.ambientPlan
+  const rich = garden({
+    counts: kindCounts({ ivy: 180, grass: 40, sprout: 20, mushroom: 12, weed: 3, dandelion: 3, flower: 4 }),
+    harvestCount: 2,
+  })
+  const summer = { key: 'summer', index: 1, pressure: 0.5, nearHarvest: false }
+  const plan = planOf(rich, summer, {})
+  assert.ok(plan.vines > 0 && plan.vines <= 16, 'vine budget broken: ' + plan.vines)
+  assert.ok(plan.edge.length >= 1 && plan.edge.length <= 3, 'edge budget broken')
+  assert.equal(plan.particles, 'seeds', 'dandelions should claim the particle slot')
+  assert.ok(plan.particlesCount > 0 && plan.particlesCount <= 40)
+  // winter never shows seeds, and rare flora sizes the edge band
+  const winter = planOf(rich, { key: 'winter', index: 3, pressure: 0.9, nearHarvest: false }, {})
+  assert.equal(winter.particles, 'snow')
+  assert.ok(winter.edge.includes('tuple') === false)
+  // reduced motion: no particles, fewer vines
+  const reduced = planOf(rich, summer, { reduced: true })
+  assert.equal(reduced.particles, null)
+  assert.equal(reduced.particlesCount, 0)
+  assert.ok(reduced.vines <= 6)
+  // empty garden: nothing at all
+  const empty = planOf(garden({}), summer, {})
+  assert.equal(empty.vines, 0)
+  assert.equal(empty.particles, null)
+  assert.equal(empty.edge.length, 0)
+})
+
+await test('overlay markup draws two vine strips and one particle family', () => {
+  const { moduleExports } = loadClient()
+  const build = moduleExports.__model.buildOverlayMarkup
+  const base = { vines: 8, edge: ['tufts', 'sprouts', 'mushrooms'], particles: 'seeds', particlesCount: 10, reduced: false }
+  const html = build({ width: 900, height: 700 }, base)
+  assert.ok(html.includes('cg-ambient-vine-layer'), 'vine layer missing')
+  assert.equal((html.match(/<svg class="cg-ambient-vines/g) || []).length, 2, 'expected two side strips')
+  assert.ok(html.includes('preserveAspectRatio="xMidYMid slice"'), 'vines must keep their aspect')
+  assert.ok(html.includes('cg-vine') && html.includes('cg-vine-leaf'), 'vine strokes or leaves missing')
+  // the brim flora lives in the bed now, not in the overlay
+  assert.ok(!html.includes('cg-ambient-edge'), 'edge band should no longer be part of the overlay')
+  const particles = (html.match(/cg-particle /g) || []).length
+  assert.equal(particles, 10)
+  assert.ok(html.includes('cg-particle-seeds'), 'seed particle class missing')
+  // reduced motion keeps the static vines and drops the particles
+  const reduced = build({ width: 900, height: 700 }, { ...base, particlesCount: 0 })
+  assert.ok(!reduced.includes('cg-particle '), 'no particles under reduced motion')
+  assert.ok(reduced.includes('cg-vine'), 'static vines should remain')
+  // nothing at all
+  assert.equal(build({ width: 900, height: 700 }, {}), '')
+  assert.equal(build({ width: 900, height: 700 }, { vines: 0, edge: [], particles: null, particlesCount: 0 }), '')
+})
+
+await test('the bed draws every species at a legible intrinsic size', async () => {
   const { moduleExports, runtime } = loadClient()
   const model = moduleExports.__model
   const plants = host.KINDS.map((kind, index) => plant(index + 1, kind, 120))
   const gardenValue = garden({ plants, planted: plants.length })
   const season = model.seasonOf(gardenValue, PRESSURE_MID)
-  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key }])
-  assert.ok(out.classes.some((name) => name.includes('cg-bed')), 'bed missing')
+  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key, width: 900 }])
   assert.equal(classCount(out, 'cg-plant'), host.KINDS.length, 'every kind should be drawn')
   const kinds = [...new Set(out.kinds)]
   for (const kind of host.KINDS) assert.ok(kinds.includes(kind), 'missing bed plant ' + kind)
-  assert.ok(out.seasons.includes('summer'))
+  for (const kind of host.KINDS) {
+    const art = model.SPECIES_ART[kind]
+    assert.ok(art && art.read >= 15 && art.read <= 23, 'species read size out of range: ' + kind)
+  }
+  assert.ok(classCount(out, 'cg-bed-brim') > 0, 'brim flora missing')
 })
 
-await test('a harvested bed in winter shows snow and the lotus summary', async () => {
+await test('the bed capacity follows the measured width', async () => {
+  const plants = Array.from({ length: 80 }, (_, i) => plant(i + 1, i % 2 ? 'grass' : 'cactus', 60))
+  const gardenValue = garden({ plants, planted: plants.length })
+  // Fresh runtimes: the mini harness keeps hook state per load, which is what a
+  // remount looks like, so each width gets its own instance.
+  const wideClient = loadClient()
+  const wideSeason = wideClient.moduleExports.__model.seasonOf(gardenValue, PRESSURE_MID)
+  const wide = await mount(wideClient.runtime, wideClient.moduleExports.__model.GardenBed, [
+    { garden: gardenValue, season: wideSeason, flash: null, tr: (key) => key, width: 960 },
+  ])
+  const narrowClient = loadClient()
+  const narrowSeason = narrowClient.moduleExports.__model.seasonOf(gardenValue, PRESSURE_MID)
+  const narrow = await mount(narrowClient.runtime, narrowClient.moduleExports.__model.GardenBed, [
+    { garden: gardenValue, season: narrowSeason, flash: null, tr: (key) => key, width: 300 },
+  ])
+  assert.equal(classCount(wide, 'cg-plant'), 30, 'wide bed should seat 30 plants')
+  assert.equal(classCount(narrow, 'cg-plant'), 10, 'narrow bed should seat 10 plants')
+})
+
+await test('a harvested bed in winter shows the lotus alone', async () => {
   const { moduleExports, runtime } = loadClient()
   const model = moduleExports.__model
   const gardenValue = garden({ plants: [plant(9, 'lotus', 400)], planted: 10, harvestCount: 3, seeds: 40 })
   const season = model.seasonOf(gardenValue, PRESSURE_MID)
   assert.equal(season.key, 'winter')
-  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key }])
+  const out = await mount(runtime, model.GardenBed, [{ garden: gardenValue, season, flash: null, tr: (key) => key, width: 900 }])
   assert.ok(out.seasons.includes('winter'))
   assert.deepEqual([...new Set(out.kinds)], ['lotus'])
   assert.equal(classCount(out, 'cg-plant'), 1)

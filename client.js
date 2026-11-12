@@ -427,8 +427,30 @@ window.__ModuleLoader__.load({
 
     // ---- plant glyphs --------------------------------------------------
     /**
-     * One plant, drawn in local coordinates with its root at (0, 0).
-     * The caller positions and scales the wrapping group.
+     * Art metadata per species: the height the drawing actually reaches, its
+     * widest half-extent, and the height it should read as in a shared row.
+     * `SpeciesArt` uses these to give every species a legible minimum size
+     * instead of the old fixed 26x29 box where a sprout was 9 px tall.
+     */
+    const SPECIES_ART = {
+      cactus: { top: 16.6, half: 9.2, read: 19 },
+      flower: { top: 19.6, half: 6.4, read: 20 },
+      weed: { top: 18.2, half: 8.4, read: 18 },
+      bamboo: { top: 23.2, half: 7.6, read: 23 },
+      rice: { top: 23.6, half: 6.8, read: 23 },
+      grass: { top: 15.4, half: 9.6, read: 15 },
+      sprout: { top: 14.6, half: 8.2, read: 15 },
+      ivy: { top: 18.6, half: 7.8, read: 18 },
+      dandelion: { top: 24.4, half: 7.2, read: 22 },
+      mushroom: { top: 14.6, half: 9.0, read: 15 },
+      lotus: { top: 18.4, half: 8.6, read: 19 },
+    }
+
+    /**
+     * One plant drawn in local coordinates with its root at (0, 0), y going up
+     * (negative). Shapes are group-outlined by `SpeciesArt`, so fill-only
+     * silhouettes stay readable on both light and dark paper; tiny accents opt
+     * out with stroke="none".
      */
     function PlantGlyph(props) {
       const kind = kindOf(props.kind)
@@ -437,79 +459,59 @@ window.__ModuleLoader__.load({
           React.Fragment,
           null,
           h('path', {
-            d: 'M-2.8 0 L-2.8 -10.6 Q-2.8 -14.2 0 -14.2 Q2.8 -14.2 2.8 -10.6 L2.8 0 Z',
+            d: 'M-3 0 L-3 -11.4 Q-3 -15.4 0 -15.4 Q3 -15.4 3 -11.4 L3 0 Z',
             fill: 'var(--cg-leaf-deep)',
           }),
+          h('path', { d: 'M-1 -13.6 V-2.4 M1 -13.6 V-2.4', stroke: 'var(--cg-leaf)', strokeWidth: 0.5, strokeLinecap: 'round', opacity: 0.5, fill: 'none' }),
           h('path', {
-            d: 'M-1 -12.6 V-2 M1 -12.6 V-2',
-            stroke: 'var(--cg-leaf)',
-            strokeWidth: 0.5,
-            strokeLinecap: 'round',
-            opacity: 0.55,
-          }),
-          h('path', {
-            d: 'M-2.8 -6.8 H-6.2 Q-8.6 -6.8 -8.6 -4.4 V-1.8',
+            d: 'M-3 -7.4 H-6.6 Q-9.2 -7.4 -9.2 -4.8 V-1.8',
             fill: 'none',
             stroke: 'var(--cg-leaf-deep)',
-            strokeWidth: 2.9,
+            strokeWidth: 3.1,
             strokeLinecap: 'round',
           }),
           h('path', {
-            d: 'M2.8 -9.2 H5.8 Q8 -9.2 8 -7 V-4.2',
+            d: 'M3 -10 H6.2 Q8.6 -10 8.6 -7.6 V-4.4',
             fill: 'none',
             stroke: 'var(--cg-leaf-deep)',
-            strokeWidth: 2.6,
+            strokeWidth: 2.7,
             strokeLinecap: 'round',
           }),
           h('path', {
-            d: 'M-1.8 -3.6 v0.9 M1.6 -5.6 v0.9 M-1.6 -8.6 v0.9 M1 -10.8 v0.8',
+            d: 'M-4.6 -3.2 v1 M4.4 -5 v1 M-1.9 -5.6 v1 M1.7 -8 v1 M-1.7 -11 v1 M1 -13.4 v0.9',
             stroke: 'var(--cg-leaf)',
-            strokeWidth: 0.65,
+            strokeWidth: 0.6,
             strokeLinecap: 'round',
-            opacity: 0.7,
+            opacity: 0.65,
+            fill: 'none',
           }),
-          h('ellipse', { cx: 0, cy: -14.4, rx: 1.5, ry: 0.8, fill: 'var(--cg-sprout)', opacity: 0.9 }),
+          h('path', { d: 'M0 -15.4 q2.6 -1.8 3.2 -4.2 q-2.4 0.4 -3.2 2.4 q-0.8 -2 -3.2 -2.4 q0.6 2.4 3.2 4.2 z', fill: 'var(--cg-blossom)', strokeWidth: 0.35 }),
         )
       }
       if (kind === 'flower') {
         return h(
           React.Fragment,
           null,
-          h('path', { d: 'M0 0 V-13.2', stroke: 'var(--cg-leaf)', strokeWidth: 1.15, strokeLinecap: 'round' }),
-          h('ellipse', {
-            cx: -3.4,
-            cy: -7.6,
-            rx: 3,
-            ry: 1.25,
-            transform: 'rotate(-34 -3.4 -7.6)',
-            fill: 'var(--cg-leaf)',
-          }),
-          h('ellipse', {
-            cx: 3.2,
-            cy: -9.4,
-            rx: 2.7,
-            ry: 1.15,
-            transform: 'rotate(28 3.2 -9.4)',
-            fill: 'var(--cg-leaf)',
-            opacity: 0.9,
-          }),
+          h('path', { d: 'M0 0 V-15.4', stroke: 'var(--cg-leaf)', strokeWidth: 1.15, strokeLinecap: 'round', fill: 'none' }),
+          h('ellipse', { cx: -3.8, cy: -8.4, rx: 3.2, ry: 1.3, transform: 'rotate(-34 -3.8 -8.4)', fill: 'var(--cg-leaf)' }),
+          h('ellipse', { cx: 3.6, cy: -10.4, rx: 2.9, ry: 1.2, transform: 'rotate(28 3.6 -10.4)', fill: 'var(--cg-leaf)', opacity: 0.92 }),
           h(
             'g',
             null,
             [0, 60, 120, 180, 240, 300].map((angle, i) =>
               h('ellipse', {
-                key: i,
+                key: 'petal' + i,
                 cx: 0,
-                cy: -17.4,
-                rx: 2.9,
-                ry: 1.7,
-                transform: 'rotate(' + angle + ' 0 -17.4)',
+                cy: -19.2,
+                rx: 3.1,
+                ry: 1.8,
+                transform: 'rotate(' + angle + ' 0 -19.2)',
                 fill: 'var(--cg-blossom)',
               }),
             ),
           ),
-          h('circle', { cx: 0, cy: -17.4, r: 2, fill: 'var(--cg-blossom)', opacity: 0.95 }),
-          h('circle', { cx: 0, cy: -17.4, r: 1.2, fill: 'var(--cg-amber)' }),
+          h('circle', { cx: 0, cy: -19.2, r: 2.1, fill: 'var(--cg-blossom)' }),
+          h('circle', { cx: 0, cy: -19.2, r: 1.25, fill: 'var(--cg-amber)', stroke: 'none' }),
         )
       }
       if (kind === 'weed') {
@@ -517,104 +519,103 @@ window.__ModuleLoader__.load({
           React.Fragment,
           null,
           h('path', {
-            d: 'M0 0 Q-4.2 -5.6 -6.4 -11.4 M0 0 Q-0.6 -7.2 0.8 -12.8 M0 0 Q4 -5 6.2 -9.6 M0 0 Q2.6 -4.4 3.4 -8.4',
+            d: 'M0 0 Q-4 -4.6 -5.4 -9.4 Q-7.6 -6.2 -8.4 -2.4 M0 0 Q-1.4 -6 -1.8 -11',
             fill: 'none',
             stroke: 'var(--cg-weed)',
-            strokeWidth: 1.25,
+            strokeWidth: 1.35,
             strokeLinecap: 'round',
           }),
-          h('ellipse', {
-            cx: 0.9,
-            cy: -13.4,
-            rx: 1.5,
-            ry: 2.1,
-            transform: 'rotate(16 0.9 -13.4)',
+          h('path', {
+            d: 'M0 0 Q3.4 -4.2 4.6 -9 Q6.4 -5.6 7 -1.6 M0.6 -6.2 Q3.6 -6.8 5.6 -5.2 M-2.6 -8.4 Q-4.8 -9 -6.4 -7.4',
+            fill: 'none',
+            stroke: 'var(--cg-weed)',
+            strokeWidth: 1.1,
+            strokeLinecap: 'round',
+          }),
+          h('path', {
+            d: 'M-1.8 -11 Q-3.4 -13.4 -1 -15.2 Q1.2 -16.6 3.4 -15.4 Q5.2 -14.2 4.2 -12 Q3 -9.8 0.4 -10.4 Q-1.2 -10.6 -1.8 -11 Z',
             fill: 'var(--cg-weed)',
             opacity: 0.9,
           }),
+          h('path', { d: 'M-1.2 -11.6 q1.8 -1.6 4.4 -1.2 M0 -14.2 q1.4 -0.6 2.8 -0.2', fill: 'none', stroke: 'var(--cg-soil-line)', strokeWidth: 0.45, opacity: 0.5 }),
+          h('path', { d: 'M5.6 -11.6 l0.9 -2.2 M6.5 -13.8 l1.6 -0.4', fill: 'none', stroke: 'var(--cg-weed)', strokeWidth: 0.7, strokeLinecap: 'round', opacity: 0.85 }),
         )
       }
       if (kind === 'bamboo') {
         return h(
           React.Fragment,
           null,
-          h('path', { d: 'M0 0 V-20.4', stroke: 'var(--cg-bamboo)', strokeWidth: 2, strokeLinecap: 'round' }),
-          h('path', {
-            d: 'M-2 -5.6 H2 M-2 -10.6 H2 M-1.9 -15.6 H1.9',
-            stroke: 'var(--cg-leaf)',
-            strokeWidth: 0.7,
-            opacity: 0.8,
-          }),
-          h('ellipse', {
-            cx: -4.6,
-            cy: -16.6,
-            rx: 3.4,
-            ry: 1.1,
-            transform: 'rotate(-26 -4.6 -16.6)',
-            fill: 'var(--cg-leaf)',
-          }),
-          h('ellipse', {
-            cx: 4.2,
-            cy: -13.6,
-            rx: 3,
-            ry: 1,
-            transform: 'rotate(22 4.2 -13.6)',
-            fill: 'var(--cg-leaf)',
-            opacity: 0.9,
-          }),
-          h('ellipse', {
-            cx: -3.4,
-            cy: -9.2,
-            rx: 2.2,
-            ry: 0.8,
-            transform: 'rotate(-18 -3.4 -9.2)',
-            fill: 'var(--cg-grass)',
-            opacity: 0.8,
-          }),
+          h('path', { d: 'M0 0 V-21.4', stroke: 'var(--cg-bamboo)', strokeWidth: 2.6, strokeLinecap: 'butt', fill: 'none' }),
+          h('path', { d: 'M-1.9 -6 H1.9 M-1.9 -11.4 H1.9 M-1.8 -16.8 H1.8', stroke: 'var(--cg-leaf)', strokeWidth: 0.75, opacity: 0.85, fill: 'none' }),
+          h('ellipse', { cx: -5.4, cy: -18.2, rx: 4.2, ry: 1.35, transform: 'rotate(-28 -5.4 -18.2)', fill: 'var(--cg-leaf)' }),
+          h('ellipse', { cx: 5, cy: -15.2, rx: 3.8, ry: 1.25, transform: 'rotate(24 5 -15.2)', fill: 'var(--cg-leaf)', opacity: 0.94 }),
+          h('ellipse', { cx: -4, cy: -10.4, rx: 2.8, ry: 1, transform: 'rotate(-20 -4 -10.4)', fill: 'var(--cg-grass)', opacity: 0.82 }),
+          h('path', { d: 'M0 -21.4 q1.6 -1.4 2.8 -2.4', fill: 'none', stroke: 'var(--cg-leaf)', strokeWidth: 0.6, strokeLinecap: 'round', opacity: 0.8 }),
         )
       }
       if (kind === 'rice') {
         return h(
           React.Fragment,
           null,
-          h('path', { d: 'M0 0 V-16.8', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.25, strokeLinecap: 'round' }),
+          h('path', { d: 'M0 0 V-17.6 Q0.4 -20.4 2.2 -22.4', fill: 'none', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.3, strokeLinecap: 'round' }),
           h('path', {
-            d: 'M0 -5.6 Q-3.4 -7 -4.6 -10.4 M0 -9 Q3.2 -10.4 4.4 -13.6',
+            d: 'M0 -5.4 Q-3.8 -7 -5.2 -11 M0 -9 Q3.6 -10.4 4.8 -14',
             fill: 'none',
             stroke: 'var(--cg-leaf)',
-            strokeWidth: 0.9,
+            strokeWidth: 1,
             strokeLinecap: 'round',
           }),
           h(
             'g',
             { fill: 'var(--cg-rice)' },
-            h('ellipse', { cx: -0.9, cy: -18.6, rx: 1.15, ry: 2.1, transform: 'rotate(-18 -0.9 -18.6)' }),
-            h('ellipse', { cx: 1.1, cy: -19.6, rx: 1.15, ry: 2.1, transform: 'rotate(14 1.1 -19.6)' }),
-            h('ellipse', { cx: -1.5, cy: -16.6, rx: 1.1, ry: 2, transform: 'rotate(-22 -1.5 -16.6)' }),
-            h('ellipse', { cx: 1.7, cy: -17.2, rx: 1.1, ry: 2, transform: 'rotate(18 1.7 -17.2)' }),
-            h('ellipse', { cx: 0.1, cy: -20.4, rx: 1, ry: 1.9, transform: 'rotate(-2 0.1 -20.4)' }),
+            h('ellipse', { cx: 2.4, cy: -22.8, rx: 1.2, ry: 2.1, transform: 'rotate(18 2.4 -22.8)' }),
+            h('ellipse', { cx: 3.3, cy: -21, rx: 1.15, ry: 2, transform: 'rotate(26 3.3 -21)' }),
+            h('ellipse', { cx: 1.9, cy: -20.6, rx: 1.1, ry: 1.95, transform: 'rotate(10 1.9 -20.6)' }),
+            h('ellipse', { cx: 3.1, cy: -19, rx: 1.05, ry: 1.85, transform: 'rotate(28 3.1 -19)' }),
+            h('ellipse', { cx: 1.7, cy: -18.8, rx: 1, ry: 1.75, transform: 'rotate(8 1.7 -18.8)' }),
           ),
           h('path', {
-            d: 'M-2.4 -19.8 Q-4 -21.4 -4.8 -23.4',
+            d: 'M2.4 -22.8 q1.8 -1 2.6 -2.8 M3.3 -21 q1.8 -0.8 2.8 -2.4',
             fill: 'none',
             stroke: 'var(--cg-rice)',
-            strokeWidth: 0.55,
+            strokeWidth: 0.5,
             strokeLinecap: 'round',
-            opacity: 0.7,
+            opacity: 0.75,
           }),
         )
       }
       if (kind === 'grass') {
+        const blades = []
+        const angles = [-58, -38, -18, 2, 22, 44, 62]
+        for (let i = 0; i < angles.length; i += 1) {
+          const a = (angles[i] * Math.PI) / 180
+          const len = 10.5 + (i % 3) * 1.9 + (i === 3 ? 1.6 : 0)
+          const tipX = Math.sin(a) * len
+          const tipY = -Math.cos(a) * len
+          blades.push(
+            h('path', {
+              key: 'blade' + i,
+              d: 'M0 0 Q' + (tipX * 0.42).toFixed(2) + ' ' + (tipY * 0.62).toFixed(2) + ' ' + tipX.toFixed(2) + ' ' + tipY.toFixed(2),
+              fill: 'none',
+              stroke: i % 2 === 0 ? 'var(--cg-grass)' : 'var(--cg-leaf)',
+              strokeWidth: 1.05,
+              strokeLinecap: 'round',
+            }),
+          )
+        }
+        return h(React.Fragment, null, blades)
+      }
+      if (kind === 'sprout') {
         return h(
           React.Fragment,
           null,
-          h('path', {
-            d: 'M0 0 Q-5 -4.6 -6.8 -9.2 M0 0 Q-1.2 -6.4 -0.2 -10.8 M0 0 Q4.6 -5.2 6.8 -8.4 M0 0 Q1.8 -4.2 2.6 -6.6',
-            fill: 'none',
-            stroke: 'var(--cg-grass)',
-            strokeWidth: 1.05,
-            strokeLinecap: 'round',
-          }),
+          h('path', { d: 'M-1.4 0 Q-2.8 -5 -2 -9.4', fill: 'none', stroke: 'var(--cg-leaf)', strokeWidth: 1.05, strokeLinecap: 'round' }),
+          h('path', { d: 'M1.6 0 Q2.6 -4.6 2 -8.2', fill: 'none', stroke: 'var(--cg-leaf)', strokeWidth: 1, strokeLinecap: 'round' }),
+          h('ellipse', { cx: -4.6, cy: -9.6, rx: 3.2, ry: 1.6, transform: 'rotate(-30 -4.6 -9.6)', fill: 'var(--cg-sprout)' }),
+          h('ellipse', { cx: -0.2, cy: -11.4, rx: 2.9, ry: 1.5, transform: 'rotate(-16 -0.2 -11.4)', fill: 'var(--cg-sprout)', opacity: 0.95 }),
+          h('ellipse', { cx: 5, cy: -8.8, rx: 2.8, ry: 1.45, transform: 'rotate(28 5 -8.8)', fill: 'var(--cg-leaf)' }),
+          h('ellipse', { cx: 2.4, cy: -12.6, rx: 2.3, ry: 1.25, transform: 'rotate(12 2.4 -12.6)', fill: 'var(--cg-leaf)', opacity: 0.9 }),
+          h('ellipse', { cx: 0.2, cy: -1.8, rx: 3.4, ry: 0.9, fill: 'var(--cg-soil-2)', opacity: 0.4, stroke: 'none' }),
         )
       }
       if (kind === 'ivy') {
@@ -622,140 +623,130 @@ window.__ModuleLoader__.load({
           React.Fragment,
           null,
           h('path', {
-            d: 'M-1 0 Q-3.4 -3.6 -0.6 -6.4 Q2 -9 -0.2 -11.8 Q-2 -14.2 -0.4 -16.4',
+            d: 'M-1 0 Q-4.6 -3.2 -1.6 -6 Q1.8 -9 -0.4 -12.2 Q-2.4 -15 -0.6 -17.4',
             fill: 'none',
             stroke: 'var(--cg-ivy)',
-            strokeWidth: 1.15,
+            strokeWidth: 1.25,
             strokeLinecap: 'round',
           }),
           h('path', {
-            d: 'M-2.6 -8.2 q-2.2 -0.4 -3 -2.6 q2.1 -0.5 3.4 0.6 q0.9 -1.6 2.9 -1.4 q-0.6 2.2 -3.3 3.4 z',
+            d: 'M-2.6 -6.4 q-2.8 -0.6 -3.8 -3.4 q2.8 -0.6 4.4 0.8 q1.2 -2.1 3.8 -1.8 q-0.8 2.9 -4.4 4.4 z',
             fill: 'var(--cg-ivy)',
-            opacity: 0.92,
           }),
           h('path', {
-            d: 'M1.4 -12.6 q1.9 -1.6 3.9 -0.9 q-0.4 2 -2.5 2.5 q1 1.3 0.2 2.9 q-2 -0.9 -2.4 -3.2 q-1.4 0.3 -2.4 -0.9 q1.2 -1.3 3.2 -0.4 z',
+            d: 'M2 -12.2 q2.4 -2 4.9 -1.1 q-0.6 2.6 -3.2 3.2 q1.3 1.7 0.2 3.7 q-2.6 -1.2 -3 -4.1 q-1.8 0.4 -3.1 -1.1 q1.6 -1.7 4.2 -0.6 z',
             fill: 'var(--cg-ivy)',
-            opacity: 0.78,
+            opacity: 0.86,
           }),
           h('path', {
-            d: 'M-1.6 -2.4 q-2.4 0.4 -3.2 -1.6 q1.9 -1.1 3.6 0.2',
-            fill: 'var(--cg-ivy)',
-            opacity: 0.7,
+            d: 'M-0.9 0 Q3 -1 4.6 -4.2', fill: 'none', stroke: 'var(--cg-ivy)', strokeWidth: 0.9, strokeLinecap: 'round', opacity: 0.8,
           }),
+          h('circle', { cx: 3.4, cy: -8.6, r: 0.7, fill: 'var(--cg-ivy)', stroke: 'none', opacity: 0.7 }),
         )
       }
       if (kind === 'dandelion') {
         const rays = []
-        for (let i = 0; i < 9; i += 1) {
-          const angle = (i * 40) % 360
+        for (let i = 0; i < 10; i += 1) {
+          const angle = (i * 36) % 360
           rays.push(
             h('path', {
               key: 'ray' + i,
-              d: 'M0 -16.4 l0 -3.4',
-              transform: 'rotate(' + angle + ' 0 -16.4)',
+              d: 'M0 -19.4 l0 -3.6',
+              transform: 'rotate(' + angle + ' 0 -19.4)',
               stroke: 'var(--cg-dandelion)',
-              strokeWidth: 0.6,
+              strokeWidth: 0.75,
               strokeLinecap: 'round',
+              fill: 'none',
             }),
           )
         }
         return h(
           React.Fragment,
           null,
-          h('path', { d: 'M0 0 V-13.6', stroke: 'var(--cg-leaf)', strokeWidth: 1, strokeLinecap: 'round' }),
-          h('path', {
-            d: 'M0 -3.6 Q-3.4 -4.8 -4.4 -7.8 M0 -6 Q3 -7 3.8 -9.6',
-            fill: 'none',
-            stroke: 'var(--cg-leaf)',
-            strokeWidth: 0.8,
-            strokeLinecap: 'round',
-          }),
-          h('circle', { cx: 0, cy: -16.4, r: 1.1, fill: 'var(--cg-dandelion)' }),
+          h('path', { d: 'M0 0 V-14.6', stroke: 'var(--cg-leaf)', strokeWidth: 1.15, strokeLinecap: 'round', fill: 'none' }),
+          h('path', { d: 'M0 -3.2 Q-4.2 -4.6 -5.4 -8 M0 -5.8 Q3.6 -6.8 4.6 -9.8', fill: 'none', stroke: 'var(--cg-leaf)', strokeWidth: 0.9, strokeLinecap: 'round' }),
+          h('circle', { cx: 0, cy: -19.4, r: 2.1, fill: 'var(--cg-dandelion)' }),
           rays,
-          h('circle', { cx: 4.9, cy: -19.4, r: 0.75, fill: 'var(--cg-dandelion)', opacity: 0.9 }),
-          h('path', {
-            d: 'M4.9 -19.4 l1.6 -3.2',
-            stroke: 'var(--cg-dandelion)',
-            strokeWidth: 0.4,
-            strokeLinecap: 'round',
-            opacity: 0.8,
-          }),
+          h('circle', { cx: 5.6, cy: -23, r: 0.95, fill: 'var(--cg-dandelion)' }),
+          h('path', { d: 'M5.6 -23 l2 -3.6', stroke: 'var(--cg-dandelion)', strokeWidth: 0.5, strokeLinecap: 'round', fill: 'none' }),
+          h('path', { d: 'M5.6 -23 l-1.8 -3', stroke: 'var(--cg-dandelion)', strokeWidth: 0.45, strokeLinecap: 'round', fill: 'none' }),
         )
       }
       if (kind === 'mushroom') {
         return h(
           React.Fragment,
           null,
-          h('path', {
-            d: 'M-1.7 0 V-5.2 Q-1.7 -7 0 -7 Q1.7 -7 1.7 -5.2 V0 Z',
-            fill: 'var(--cg-mushroom-stem)',
-            stroke: 'var(--cg-soil-line)',
-            strokeWidth: 0.25,
-          }),
-          h('path', {
-            d: 'M-5.8 -5.4 Q-5.8 -11 0 -11 Q5.8 -11 5.8 -5.4 Q0 -3.6 -5.8 -5.4 Z',
-            fill: 'var(--cg-mushroom)',
-          }),
-          h('circle', { cx: -2.4, cy: -7.8, r: 0.75, fill: 'var(--cg-paper)', opacity: 0.75 }),
-          h('circle', { cx: 1.6, cy: -8.8, r: 0.6, fill: 'var(--cg-paper)', opacity: 0.7 }),
-          h('circle', { cx: 3.1, cy: -6.4, r: 0.45, fill: 'var(--cg-paper)', opacity: 0.6 }),
+          h('path', { d: 'M-2.1 0 V-6 Q-2.1 -8 0 -8 Q2.1 -8 2.1 -6 V0 Z', fill: 'var(--cg-mushroom-stem)' }),
+          h('path', { d: 'M-7 -6.2 Q-7 -13.2 0 -13.2 Q7 -13.2 7 -6.2 Q0 -4 1.4 -6.2 Z', fill: 'var(--cg-mushroom)' }),
+          h('circle', { cx: -2.8, cy: -9.2, r: 0.95, fill: 'var(--cg-paper)', opacity: 0.78, stroke: 'none' }),
+          h('circle', { cx: 1.9, cy: -10.6, r: 0.8, fill: 'var(--cg-paper)', opacity: 0.7, stroke: 'none' }),
+          h('circle', { cx: 3.9, cy: -7.4, r: 0.6, fill: 'var(--cg-paper)', opacity: 0.6, stroke: 'none' }),
+          h('path', { d: 'M4.4 0 V-3.4 Q4.4 -4.8 5.8 -4.8 Q7.2 -4.8 7.2 -3.4 V0 Z', fill: 'var(--cg-mushroom-stem)' }),
+          h('path', { d: 'M2.6 -3.8 Q2.6 -8.2 5.9 -8.2 Q9.2 -8.2 9.2 -3.8 Q5.9 -2.4 2.6 -3.8 Z', fill: 'var(--cg-mushroom)', opacity: 0.92 }),
+          h('path', { d: 'M-5.4 -1.6 q2.6 -1 5.4 -0.2 q2.8 0.8 5 -0.2', fill: 'none', stroke: 'var(--cg-soil-line)', strokeWidth: 0.5, opacity: 0.35 }),
         )
       }
       if (kind === 'lotus') {
         return h(
           React.Fragment,
           null,
-          h('ellipse', { cx: 0, cy: -1.1, rx: 5.6, ry: 1.7, fill: 'var(--cg-water)', opacity: 0.4 }),
-          h('path', { d: 'M0 0 V-8.6', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.05, strokeLinecap: 'round' }),
-          h('ellipse', {
-            cx: -3.4,
-            cy: -9.4,
-            rx: 2.4,
-            ry: 1.1,
-            transform: 'rotate(-18 -3.4 -9.4)',
-            fill: 'var(--cg-lotus)',
-            opacity: 0.9,
-          }),
+          h('ellipse', { cx: 0, cy: -0.9, rx: 7.6, ry: 2.2, fill: 'var(--cg-water)', opacity: 0.45, stroke: 'none' }),
+          h('ellipse', { cx: 0, cy: -1.2, rx: 5.4, ry: 1.4, fill: 'none', stroke: 'var(--cg-paper)', strokeWidth: 0.5, opacity: 0.4 }),
+          h('path', { d: 'M0 0 V-9.6', stroke: 'var(--cg-leaf-deep)', strokeWidth: 1.1, strokeLinecap: 'round', fill: 'none' }),
+          h('ellipse', { cx: -5, cy: -10.4, rx: 3.4, ry: 1.5, transform: 'rotate(-16 -5 -10.4)', fill: 'var(--cg-leaf)', opacity: 0.9 }),
+          h('ellipse', { cx: 5, cy: -10.8, rx: 3.1, ry: 1.4, transform: 'rotate(18 5 -10.8)', fill: 'var(--cg-leaf)', opacity: 0.9 }),
           h(
             'g',
             null,
-            [-58, -29, 0, 29, 58].map((angle, i) =>
+            [-64, -32, 0, 32, 64].map((angle, i) =>
               h('ellipse', {
                 key: 'petal' + i,
                 cx: 0,
-                cy: -13.4,
-                rx: 1.75,
-                ry: 3.2,
-                transform: 'rotate(' + angle + ' 0 -13.4)',
+                cy: -15.2,
+                rx: 2.1,
+                ry: 4.2,
+                transform: 'rotate(' + angle + ' 0 -15.2)',
                 fill: 'var(--cg-lotus)',
               }),
             ),
           ),
-          h('circle', { cx: 0, cy: -13.2, r: 1.15, fill: 'var(--cg-amber)' }),
+          h('circle', { cx: 0, cy: -14.4, r: 1.5, fill: 'var(--cg-amber)', stroke: 'none' }),
+          h('path', { d: 'M-6.4 -0.4 q6.4 1.4 12.8 0', fill: 'none', stroke: 'var(--cg-water)', strokeWidth: 0.5, opacity: 0.5 }),
         )
       }
-      // sprout
+      return h(React.Fragment, null)
+    }
+
+    /**
+     * A species sprite that always reads at a legible size: the drawing is
+     * placed in a viewBox derived from its real extent, and scaled to its
+     * `read` height, so a sprout and a bamboo differ but both stay visible.
+     */
+    function SpeciesArt(props) {
+      const kind = kindOf(props.kind)
+      const art = SPECIES_ART[kind] || SPECIES_ART.grass
+      const top = art.top + 0.9
+      const half = art.half + 0.9
+      const className = typeof props.className === 'string' ? props.className : 'cg-art-svg'
       return h(
-        React.Fragment,
-        null,
-        h('path', { d: 'M0 0 V-6.4', stroke: 'var(--cg-leaf)', strokeWidth: 0.95, strokeLinecap: 'round' }),
-        h('ellipse', {
-          cx: -2.2,
-          cy: -6.8,
-          rx: 2.5,
-          ry: 1.35,
-          transform: 'rotate(-32 -2.2 -6.8)',
-          fill: 'var(--cg-sprout)',
-        }),
-        h('ellipse', {
-          cx: 2.2,
-          cy: -7.4,
-          rx: 2.3,
-          ry: 1.25,
-          transform: 'rotate(30 2.2 -7.4)',
-          fill: 'var(--cg-leaf)',
-        }),
+        'svg',
+        {
+          viewBox: (-half).toFixed(2) + ' ' + (-top).toFixed(2) + ' ' + (half * 2).toFixed(2) + ' ' + (top + 1.2).toFixed(2),
+          className,
+          'aria-hidden': true,
+          focusable: false,
+        },
+        h(
+          'g',
+          {
+            className: 'cg-ink',
+            stroke: 'var(--cg-outline)',
+            strokeWidth: 0.42,
+            strokeLinejoin: 'round',
+            paintOrder: 'stroke',
+          },
+          h(PlantGlyph, { kind }),
+        ),
       )
     }
 
@@ -985,11 +976,11 @@ window.__ModuleLoader__.load({
       const flashPlants = flash !== null && Array.isArray(flash.plants) && flash.plants.length > 0 ? flash.plants : null
       const plants = flashPlants !== null ? flashPlants : garden.plants
       const maxPlants = dock ? DOCK_PLANTS : PANEL_PLANTS
-      const visible = plants.slice(-maxPlants)
+      const visible = sampleField(plants, maxPlants)
       const rowCount = dock ? 2 : 3
       const columns = Math.max(1, Math.ceil(visible.length / rowCount))
       const rowBases = dock ? [48.5, 44] : [200, 220, 237]
-      const rowScales = dock ? [0.62, 0.74] : [1.55, 1.85, 2.15]
+      const rowScales = dock ? [0.62, 0.74] : [1.12, 1.32, 1.52]
       const rowOpacity = dock ? [0.9, 1] : [0.72, 0.86, 1]
       const placed = visible.map((plant, index) => {
         const row = index % rowCount
@@ -1325,193 +1316,435 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /** The full-width, borderless bed that rests on the composer's top edge. */
+    // ---- composition sampling -----------------------------------------
+    /**
+     * Pick the plants a surface draws, honouring both the field's composition
+     * and its recency: every species present gets a seat, the rest is shared
+     * proportionally, and each species contributes its newest specimens. Pure
+     * and deterministic, so a replayed log draws the same bed.
+     *
+     * @param plants - the field, oldest first.
+     * @param capacity - how many seats the surface has.
+     * @returns plants in log order, at most `capacity`.
+     */
+    function sampleField(plants, capacity) {
+      const list = Array.isArray(plants) ? plants.filter((plant) => plant && KINDS.includes(plant.kind)) : []
+      const seats = Math.max(0, Math.min(Math.floor(num(capacity)), list.length))
+      if (seats === 0) return []
+      const groups = new Map()
+      for (const plant of list) {
+        if (!groups.has(plant.kind)) groups.set(plant.kind, [])
+        groups.get(plant.kind).push(plant)
+      }
+      const present = [...groups.keys()]
+      const picked = []
+      if (seats <= present.length) {
+        for (const kind of present.slice(-seats)) picked.push(groups.get(kind)[groups.get(kind).length - 1])
+      } else {
+        const quota = new Map()
+        for (const kind of present) quota.set(kind, 1)
+        let remaining = seats - present.length
+        const total = list.length
+        const shares = present
+          .map((kind) => ({ kind, exact: (groups.get(kind).length / total) * remaining, room: groups.get(kind).length - 1 }))
+          .sort((a, b) => b.exact - a.exact)
+        let handed = 0
+        for (const share of shares) {
+          const add = Math.min(share.room, Math.floor(share.exact), remaining - handed)
+          if (add > 0) {
+            quota.set(share.kind, quota.get(share.kind) + add)
+            handed += add
+          }
+        }
+        let spare = remaining - handed
+        for (let round = 0; spare > 0 && round < 8; round += 1) {
+          for (const kind of present) {
+            if (spare <= 0) break
+            const room = groups.get(kind).length - quota.get(kind)
+            if (room > 0) {
+              quota.set(kind, quota.get(kind) + 1)
+              spare -= 1
+            }
+          }
+        }
+        for (const kind of present) {
+          const take = Math.min(quota.get(kind), groups.get(kind).length)
+          const slice = groups.get(kind).slice(groups.get(kind).length - take)
+          for (const plant of slice) picked.push(plant)
+        }
+      }
+      picked.sort((a, b) => num(a.seq) - num(b.seq))
+      return picked.length > seats ? picked.slice(picked.length - seats) : picked
+    }
+
+    /** Measure an element's width without a layout dependency in tests. */
+    function useMeasuredWidth(initial) {
+      const ref = React.useRef(null)
+      const [width, setWidth] = React.useState(Math.max(0, Math.round(num(initial))))
+      React.useEffect(() => {
+        const node = ref.current
+        if (node === null || typeof node.getBoundingClientRect !== 'function') return undefined
+        const read = () => {
+          const measured = node.getBoundingClientRect().width
+          if (measured > 0) setWidth(Math.round(measured))
+        }
+        read()
+        if (typeof ResizeObserver !== 'function') return undefined
+        const observer = new ResizeObserver(read)
+        observer.observe(node)
+        return () => observer.disconnect()
+      }, [])
+      return [ref, width]
+    }
+
+    /** Track the user's reduced-motion preference at runtime. */
+    function useReducedMotion() {
+      const [reduced, setReduced] = React.useState(false)
+      React.useEffect(() => {
+        let media = null
+        try {
+          media = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
+        } catch {
+          media = null
+        }
+        if (media === null) return undefined
+        const sync = () => setReduced(media.matches === true)
+        sync()
+        if (typeof media.addEventListener === 'function') {
+          media.addEventListener('change', sync)
+          return () => media.removeEventListener('change', sync)
+        }
+        return undefined
+      }, [])
+      return reduced
+    }
+
+    // ---- the bed on the composer ---------------------------------------
+    /** Rows of the bed, back to front. */
+    const BED_ROWS = [
+      { scale: 0.78, opacity: 0.7, lift: 2 },
+      { scale: 0.9, opacity: 0.86, lift: 1 },
+      { scale: 1, opacity: 1, lift: 0 },
+    ]
+
+    /**
+     * The full-width, borderless bed that rests on the composer's top edge.
+     * Plants are sampled for composition, laid out in three depth rows whose
+     * count follows the measured width, rooted on the soil line, and — during
+     * a harvest — launched toward the seed balance on the right.
+     */
     function GardenBed(props) {
       const garden = props.garden
       const season = props.season
       const flash = props.flash
       const flashPlants = flash !== null && Array.isArray(flash.plants) && flash.plants.length > 0 ? flash.plants : null
       const plants = flashPlants !== null ? flashPlants : garden.plants
-      const visible = plants.slice(-MAX_BED_PLANTS)
-      const flying = flashPlants !== null
-      const rows = visible.map((plant, index) => {
-        const seed = hashNum(plant.seq * 41 + 3)
-        const slotCount = Math.max(1, visible.length)
-        const base = 4 + 92 * ((index + 0.5) / slotCount)
-        const jitter = ((seed % 1000) / 1000 - 0.5) * (slotCount > 16 ? 2.4 : 4)
-        const row = index % 2
-        const scale = (row === 0 ? 0.92 : 1.06) * (0.9 + ((hashNum(seed) % 100) / 100) * 0.2)
-        return { plant, index, row, x: base + jitter, scale, seed }
+      const [ref, measured] = useMeasuredWidth(num(props.width))
+      const widthPx = measured > 0 ? measured : num(props.width)
+      const capacity = widthPx > 0 ? clamp(Math.floor(widthPx / 30), 6, 30) : MAX_BED_PLANTS
+      const picked = sampleField(plants, capacity)
+      const rows = BED_ROWS.map(() => [])
+      picked.forEach((plant, index) => rows[index % BED_ROWS.length].push(plant))
+      const entries = []
+      rows.forEach((rowPlants, row) => {
+        const spread = 94 / Math.max(1, rowPlants.length)
+        const offset = (row - 1) * spread * 0.5
+        rowPlants.forEach((plant, seat) => {
+          const seed = hashNum(plant.seq * 41 + 3)
+          const jitter = ((seed % 1000) / 1000 - 0.5) * spread * 0.24
+          const x = clamp(3 + spread * (seat + 0.5) + jitter + offset, 2.5, 97.5)
+          const dx = widthPx > 0 ? Math.max(18, widthPx - (x / 100) * widthPx + 30) : 26
+          entries.push({
+            plant,
+            row,
+            x,
+            seed,
+            dx,
+            height: (SPECIES_ART[plant.kind] || SPECIES_ART.grass).read,
+          })
+        })
       })
+      entries.sort((a, b) => a.row - b.row || num(a.plant.seq) - num(b.plant.seq))
+      const ambient = props.ambient !== null && typeof props.ambient === 'object' ? props.ambient : ambientPlan(garden, season, {})
+      const brim = edgeItems(ambient, widthPx).slice(0, 7)
       return h(
         'div',
-        { className: 'cg-bed', 'data-season': season.key, 'data-plants': String(visible.length) },
-        rows.map((entry) =>
+        {
+          className: 'cg-bed',
+          ref,
+          'data-season': season.key,
+          'data-plants': String(picked.length),
+          'data-capacity': String(capacity),
+        },
+        brim.map((item, index) =>
+          h(
+            'span',
+            {
+              key: 'brim' + item.kind + index,
+              className: 'cg-bed-brim',
+              'data-brim': item.kind,
+              style: { left: item.left.toFixed(1) + '%', '--cg-brim-h': Math.round((SPECIES_ART[item.kind] || SPECIES_ART.grass).read * 0.72) + 'px' },
+            },
+            h(SpeciesArt, { kind: item.kind, className: 'cg-brim-art' }),
+          ),
+        ),
+        entries.map((entry) =>
           h(
             'span',
             {
               key: 'bed' + entry.plant.seq + '-' + entry.index,
-              className: 'cg-bed-plant cg-plant' + (flying ? ' cg-bed-fly' : ''),
+              className: 'cg-bed-plant cg-plant' + (flashPlants !== null ? ' cg-bed-harvesting' : ''),
               'data-kind': entry.plant.kind,
               style: {
                 left: entry.x.toFixed(2) + '%',
-                bottom: (entry.row === 1 ? 1 : 3) + 'px',
-                '--cg-scale': entry.scale.toFixed(3),
-                '--cg-sway-dur': (5 + (entry.seed % 260) / 100).toFixed(2) + 's',
-                '--cg-sway-delay': '-' + ((entry.seed % 460) / 100).toFixed(2) + 's',
-                zIndex: entry.row === 1 ? 2 : 1,
-                ...(flying ? { animationDelay: (entry.index % 7) * 45 + 'ms' } : {}),
+                bottom: BED_ROWS[entry.row].lift + 'px',
+                '--cg-scale': BED_ROWS[entry.row].scale.toFixed(2),
+                '--cg-op': BED_ROWS[entry.row].opacity.toFixed(2),
+                '--cg-art-h': entry.height + 'px',
+                '--cg-sway-dur': (5.4 + (entry.seed % 240) / 100).toFixed(2) + 's',
+                '--cg-sway-delay': '-' + ((entry.seed % 420) / 100).toFixed(2) + 's',
+                '--cg-fly-x': entry.dx.toFixed(0) + 'px',
+                zIndex: entry.row + 1,
+                ...(flashPlants !== null ? { animationDelay: (entry.index % 8) * 45 + 'ms' } : {}),
               },
             },
             h(
               'span',
               { className: 'cg-bed-sway' },
-              h(
-                'svg',
-                { viewBox: '-12 -24 24 27', width: 26, height: 29, 'aria-hidden': true },
-                h(PlantGlyph, { kind: entry.plant.kind }),
-              ),
+              h(SpeciesArt, { kind: entry.plant.kind }),
             ),
           ),
         ),
-        visible.length === 0 && !flying
+        picked.length === 0 && flashPlants === null
           ? h(
               'svg',
               { className: 'cg-bed-mound', viewBox: '0 0 46 14', 'aria-hidden': true },
               h('ellipse', { cx: 23, cy: 11, rx: 13, ry: 3, fill: 'var(--cg-soil-2)', opacity: 0.65 }),
               h('path', { d: 'M11 11 q12 -8 24 0 z', fill: 'var(--cg-soil-2)' }),
-              h('circle', { cx: 20, cy: 7.4, r: 1, fill: 'var(--cg-amber)' }),
-              h('circle', { cx: 25, cy: 6.8, r: 0.9, fill: 'var(--cg-amber)' }),
+              h('circle', { cx: 20, cy: 7.4, r: 1, fill: 'var(--cg-amber)', stroke: 'none' }),
+              h('circle', { cx: 25, cy: 6.8, r: 0.9, fill: 'var(--cg-amber)', stroke: 'none' }),
             )
           : null,
       )
     }
 
-    /**
-     * Build the ambient overlay markup: ivy climbing the conversation's edges
-     * and dandelion seeds drifting across it. Pure string builder so the render
-     * tests can check it without a DOM.
-     *
-     * @param rect - visible conversation rectangle in CSS pixels.
-     * @param options - lifetime ivy count, current dandelions in the field, mode.
-     * @returns an HTML string for the fixed, pointer-events-none overlay.
-     */
-    function buildOverlayMarkup(rect, options) {
-      const source = rect !== null && typeof rect === 'object' ? rect : {}
-      const width = Math.max(1, Math.round(num(source.width) || 1000))
-      const height = Math.max(1, Math.round(num(source.height) || 800))
-      const ivy = Math.max(0, Math.floor(num(options === undefined ? 0 : options.ivy)))
-      const dandelions = Math.max(0, Math.floor(num(options === undefined ? 0 : options.dandelions)))
-      const reduced = options !== undefined && options !== null && options.reduced === true
-      const segments = Math.min(16, Math.ceil(ivy / 30))
-      const seedCount = reduced ? 0 : Math.min(56, Math.ceil(dandelions * 3.5))
-      if (segments === 0 && seedCount === 0) return ''
-      const span = Math.max(64, (height - 120) / Math.max(segments, 1))
-      let vines = ''
-      for (let i = 0; i < segments; i += 1) {
-        const side = i % 2 === 0 ? 1 : -1
-        const x = side > 0 ? width - 10 : 10
-        const y = height - 64 - i * span
-        const dir = side > 0 ? -1 : 1
-        const delay = i * 220
-        const d =
-          'M' + x + ' ' + y +
-          ' C' + (x + dir * 24) + ' ' + (y - 30) +
-          ', ' + (x - dir * 18) + ' ' + (y - 58) +
-          ', ' + (x + dir * 14) + ' ' + (y - 92) +
-          ' S' + (x - dir * 10) + ' ' + (y - 118) +
-          ', ' + (x + dir * 8) + ' ' + (y - 140)
-        vines += '<path class="cg-vine" pathLength="1" d="' + d + '" style="animation-delay:' + delay + 'ms"/>'
-        const tendril =
-          'M' + (x + dir * 6) + ' ' + (y - 34) +
-          ' q' + (dir * -16) + ' -10 ' + (dir * -6) + ' -24'
-        vines += '<path class="cg-vine cg-vine-tendril" pathLength="1" d="' + tendril + '" style="animation-delay:' + (delay + 160) + 'ms"/>'
-        for (let leaf = 0; leaf < 5; leaf += 1) {
-          const lx = x + dir * (10 + (leaf % 2 === 0 ? 6 : -4)) + (leaf * dir * 2)
-          const ly = y - 16 - leaf * 24
-          const rot = (leaf * 71 + i * 43) % 360
-          const size = 3.4 + (leaf % 3) * 0.6
-          vines +=
-            '<ellipse class="cg-vine-leaf" cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) +
-            '" rx="' + size.toFixed(1) + '" ry="' + (size / 2).toFixed(1) +
-            '" transform="rotate(' + rot + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) +
-            ')" style="animation-delay:' + (delay + 240 + leaf * 90) + 'ms"/>'
-        }
-      }
-      let seeds = ''
-      for (let i = 0; i < seedCount; i += 1) {
-        const seed = hashNum(i * 97 + 13)
-        const left = 5 + ((seed % 1000) / 1000) * 90
-        const top = 30 + ((hashNum(seed) % 1000) / 1000) * 60
-        const duration = (14 + (seed % 120) / 8).toFixed(1)
-        const delay = '-' + ((seed % 260) / 10).toFixed(1) + 's'
-        const dx = (hashNum(seed >> 4) % 220) - 110
-        seeds +=
-          '<span class="cg-overlay-seed" style="left:' + left.toFixed(1) + '%;top:' + top.toFixed(1) +
-          '%;animation-duration:' + duration + 's;animation-delay:' + delay + ';--cg-dx:' + dx + 'px">' +
-          '<svg viewBox="0 0 14 18" width="13" height="17" aria-hidden="true">' +
-          '<path d="M7 17 V7" stroke="var(--cg-leaf)" stroke-width=".9" stroke-linecap="round"/>' +
-          '<circle cx="7" cy="5" r="2.9" fill="var(--cg-dandelion)" opacity=".95"/>' +
-          '<path d="M7 5 l-3.2 -2.7 M7 5 l3.2 -2.7 M7 5 l0 -3.6 M7 5 l-2.4 -0.2 M7 5 l2.4 -0.2" stroke="var(--cg-dandelion)" stroke-width=".6" stroke-linecap="round" opacity=".9"/>' +
-          '</svg></span>'
-      }
-      return (
-        '<svg class="cg-overlay-vines" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" aria-hidden="true">' +
-        vines +
-        '</svg>' +
-        seeds
-      )
+    // ---- ambient growth --------------------------------------------------
+    /** Particles a season contributes when nothing rarer claims the slot. */
+    const SEASON_AMBIENT = {
+      spring: { kind: 'petal', color: 'var(--cg-blossom)', glyph: 'petal' },
+      summer: { kind: 'pollen', color: 'var(--cg-sprout)', glyph: 'mote' },
+      autumn: { kind: 'gold', color: 'var(--cg-rice)', glyph: 'mote' },
+      winter: { kind: 'snow', color: 'var(--cg-snow)', glyph: 'flake' },
+    }
+
+    /** Inline SVG markup for the edge flora (the ambient layer is string-built). */
+    const GLYPH_MARKUP = {
+      grass:
+        '<path d="M0 0Q-5.4-4.6-7.6-10.4M0 0Q-1.6-6-2.2-13M0 0Q4.6-4.8 7-9.2M0 0Q2.2-4.4 3.4-7.4" fill="none" stroke="var(--cg-grass)" stroke-width="1.05" stroke-linecap="round"/>',
+      sprout:
+        '<path d="M-1.4 0Q-2.8-5-2-9.4" fill="none" stroke="var(--cg-leaf)" stroke-width="1.05" stroke-linecap="round"/><path d="M1.6 0Q2.6-4.6 2-8.2" fill="none" stroke="var(--cg-leaf)" stroke-width="1" stroke-linecap="round"/><ellipse cx="-4.6" cy="-9.6" rx="3.2" ry="1.6" fill="var(--cg-sprout)" transform="rotate(-30 -4.6 -9.6)"/><ellipse cx="5" cy="-8.8" rx="2.8" ry="1.45" fill="var(--cg-leaf)" transform="rotate(28 5 -8.8)"/>',
+      mushroom:
+        '<path d="M-2.1 0V-6Q-2.1-8 0-8Q2.1-8 2.1-6V0Z" fill="var(--cg-mushroom-stem)"/><path d="M-7-6.2Q-7-13.2 0-13.2Q7-13.2 7-6.2Q0-4 1.4-6.2Z" fill="var(--cg-mushroom)"/><circle cx="-2.8" cy="-9.2" r="0.95" fill="var(--cg-paper)" stroke="none"/><circle cx="1.9" cy="-10.6" r="0.8" fill="var(--cg-paper)" stroke="none"/>',
+      weed:
+        '<path d="M0 0Q-4-4.6-5.4-9.4M0 0Q3.4-4.2 4.6-9M0.6-6.2Q3.6-6.8 5.6-5.2" fill="none" stroke="var(--cg-weed)" stroke-width="1.35" stroke-linecap="round"/><path d="M-1.8-11Q-3.4-13.4-1-15.2Q1.2-16.6 3.4-15.4Q5.2-14.2 4.2-12Q3-9.8 0.4-10.4Q-1.2-10.6-1.8-11Z" fill="var(--cg-weed)"/>',
+      lotus:
+        '<ellipse cx="0" cy="-0.9" rx="7.6" ry="2.2" fill="var(--cg-water)" opacity=".45" stroke="none"/><path d="M0 0V-9.6" stroke="var(--cg-leaf-deep)" stroke-width="1.1" fill="none"/><g fill="var(--cg-lotus)"><ellipse cx="0" cy="-15.2" rx="2.1" ry="4.2"/><ellipse cx="0" cy="-15.2" rx="2.1" ry="4.2" transform="rotate(-64 0 -15.2)"/><ellipse cx="0" cy="-15.2" rx="2.1" ry="4.2" transform="rotate(64 0 -15.2)"/><ellipse cx="0" cy="-15.2" rx="2.1" ry="4.2" transform="rotate(-32 0 -15.2)"/><ellipse cx="0" cy="-15.2" rx="2.1" ry="4.2" transform="rotate(32 0 -15.2)"/></g><circle cx="0" cy="-14.4" r="1.5" fill="var(--cg-amber)" stroke="none"/>',
     }
 
     /**
-     * Ambient garden effects over the conversation: ivy climbs in from the
-     * edges as internal steps accumulate, and dandelion seeds drift across the
-     * chat while dandelions stand in the field. Mounted to document.body so the
-     * composer's containing block cannot clip it; pointer-events stay off.
+     * Decide the ambient layer for one session: how much ivy climbs the edges,
+     * which quiet things grow along the bottom edge, and which single particle
+     * family drifts across the conversation. Budgets cap the layer at two
+     * dynamic and one static effect so it stays weather, not a second field.
+     *
+     * @param garden - normalized garden view.
+     * @param season - resolved season.
+     * @param options - `{ reduced }` to honour reduced motion.
+     * @returns a plain plan object, safe to compare for rebuild gating.
+     */
+    function ambientPlan(garden, season, options) {
+      const reduced = options !== undefined && options !== null && options.reduced === true
+      const source = garden !== null && typeof garden === 'object' ? garden : {}
+      const counts = source.counts !== null && typeof source.counts === 'object' ? source.counts : {}
+      const tally = {}
+      for (const kind of KINDS) tally[kind] = num(counts[kind])
+      // A projection whose counters are still empty (or a bare field in tests)
+      // is read from the standing plants instead, so the layer never goes blank
+      // while there is something growing.
+      if (sumKinds(tally) === 0 && Array.isArray(source.plants)) {
+        for (const plant of source.plants) {
+          if (plant && KINDS.includes(plant.kind)) tally[plant.kind] += 1
+        }
+      }
+      const plan = { vines: 0, edge: [], particles: null, particlesCount: 0, reduced }
+      const ivy = tally.ivy
+      plan.vines = ivy <= 0 ? 0 : reduced ? Math.min(6, Math.ceil(ivy / 60)) : Math.min(16, Math.ceil(ivy / 30))
+      const tufts = Math.min(6, Math.ceil(tally.grass / 14))
+      const sprouts = Math.min(4, Math.ceil(tally.sprout / 16))
+      const mushrooms = Math.min(2, Math.ceil(tally.mushroom / 10))
+      const weeds = Math.min(2, Math.ceil(tally.weed / 12))
+      const ripple = num(source.harvestCount) > 0 ? 1 : 0
+      const edge = []
+      if (tufts > 0) edge.push('tufts')
+      if (sprouts > 0) edge.push('sprouts')
+      if (mushrooms > 0) edge.push('mushrooms')
+      if (weeds > 0) edge.push('weeds')
+      if (ripple > 0) edge.push('ripple')
+      plan.edge = edge.slice(0, 3)
+      const active = sumKinds(tally) > 0 || num(source.harvestCount) > 0
+      if (!reduced && active) {
+        const dandelions = tally.dandelion
+        const flowers = tally.flower
+        const winter = season !== null && season !== undefined && season.key === 'winter'
+        if (dandelions > 0 && !winter) {
+          plan.particles = 'seeds'
+          plan.particlesCount = Math.min(40, Math.max(12, Math.ceil(dandelions * 4)))
+        } else if (season !== null && season !== undefined && season.key === 'spring' && flowers > 0) {
+          plan.particles = 'petals'
+          plan.particlesCount = Math.min(26, Math.max(6, Math.ceil(flowers * 1.6)))
+        } else {
+          const base = SEASON_AMBIENT[season !== null && season !== undefined ? season.key : 'summer'] || SEASON_AMBIENT.summer
+          plan.particles = base.kind
+          plan.particlesCount = season !== null && season !== undefined && season.key === 'winter' ? Math.max(16, Math.min(36, ivy)) : Math.min(24, Math.max(8, Math.ceil((tally.grass + tally.sprout) / 6)))
+        }
+      }
+      return plan
+    }
+
+    /** The edge flora drawn along the conversation's bottom line. */
+    function edgeItems(plan, width) {
+      const out = []
+      const sources = []
+      const groups = plan !== null && typeof plan === 'object' && Array.isArray(plan.edge) ? plan.edge : []
+      for (const group of groups) {
+        if (group === 'tufts') sources.push({ kind: 'grass', count: 4, min: 0.24 })
+        else if (group === 'sprouts') sources.push({ kind: 'sprout', count: 3, min: 0.32 })
+        else if (group === 'mushrooms') sources.push({ kind: 'mushroom', count: 2, min: 0.42 })
+        else if (group === 'weeds') sources.push({ kind: 'weed', count: 2, min: 0.5 })
+        else if (group === 'ripple') sources.push({ kind: 'lotus', count: 1, min: 0.5 })
+      }
+      const taken = []
+      for (let i = 0; i < sources.length; i += 1) {
+        const source = sources[i]
+        for (let n = 0; n < source.count; n += 1) {
+          const seed = hashNum(i * 97 + n * 31 + 7)
+          let left = 6 + ((seed % 1000) / 1000) * 88
+          let guard = 0
+          while (taken.some((value) => Math.abs(value - left) < source.min * 100) && guard < 6) {
+            left = 6 + (((hashNum(seed + guard * 17) % 1000) / 1000) * 88)
+            guard += 1
+          }
+          taken.push(left)
+          out.push({ kind: source.kind, left, seed })
+        }
+      }
+      return out.slice(0, 10)
+    }
+
+    /**
+     * Build the fixed ambient layer's markup. Two side strips of ivy (uniform
+     * scale, so the vines never stretch), one edge band of quiet flora, and a
+     * single particle family drifting across the column.
+     *
+     * @param rect - conversation rectangle in CSS pixels.
+     * @param plan - {@link ambientPlan} result.
+     * @returns HTML string for the overlay root.
+     */
+    function buildOverlayMarkup(rect, plan) {
+      const box = rect !== null && typeof rect === 'object' ? rect : {}
+      const width = Math.max(1, Math.round(num(box.width) || 1000))
+      const height = Math.max(1, Math.round(num(box.height) || 800))
+      const source = plan !== null && typeof plan === 'object' ? plan : {}
+      const reduced = source.reduced === true
+      const vines = Math.max(0, Math.floor(num(source.vines)))
+      const particles = typeof source.particles === 'string' ? source.particles : ''
+      const particleCount = reduced ? 0 : Math.max(0, Math.floor(num(source.particlesCount)))
+      if (vines === 0 && particleCount === 0) return ''
+      const strip = 64
+      let out = ''
+      if (vines > 0) {
+        const segments = Math.max(1, vines)
+        const span = Math.max(70, (height - 150) / Math.max(segments, 1))
+        const side = (flipped) => {
+          let paths = ''
+          for (let i = 0; i < segments; i += 1) {
+            const y = height - 70 - i * span
+            if (y < 30) break
+            const delay = i * 210
+            const bend = flipped ? -1 : 1
+            const d =
+              'M' + (flipped ? strip - 6 : 6) + ' ' + y +
+              ' C' + (10 + bend * 18) + ' ' + (y - 26) +
+              ', ' + (strip - 14 - bend * 16) + ' ' + (y - 52) +
+              ', ' + (12 + bend * 22) + ' ' + (y - 84) +
+              ' S' + (strip - 20) + ' ' + (y - 112) + ', ' + (14 + bend * 12) + ' ' + (y - 132)
+            paths += '<path class="cg-vine" pathLength="1" d="' + d + '" style="animation-delay:' + delay + 'ms"/>'
+            paths += '<path class="cg-vine cg-vine-tendril" pathLength="1" d="M' + (flipped ? strip - 16 : 16) + ' ' + (y - 34) + ' q' + (flipped ? 16 : -16) + ' -10 ' + (flipped ? 8 : -8) + ' -24" style="animation-delay:' + (delay + 150) + 'ms"/>'
+            for (let leaf = 0; leaf < 4; leaf += 1) {
+              const lx = (flipped ? strip - 20 : 20) + (leaf % 2 === 0 ? 8 : -6) * (flipped ? -1 : 1)
+              const ly = y - 18 - leaf * 26
+              const rot = (leaf * 67 + i * 41) % 360
+              paths +=
+                '<ellipse class="cg-vine-leaf" cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) +
+                '" rx="4.1" ry="2.05" transform="rotate(' + rot + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) +
+                ')" style="animation-delay:' + (delay + 240 + leaf * 90) + 'ms"/>'
+            }
+          }
+          return '<svg class="cg-ambient-vines' + (flipped ? ' cg-ambient-vines-right' : '') + '" viewBox="0 0 ' + strip + ' ' + height + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + paths + '</svg>'
+        }
+        out += '<div class="cg-ambient-vine-layer">' + side(false) + side(true) + '</div>'
+      }
+      if (particleCount > 0 && particles !== '') {
+        let dust = ''
+        for (let i = 0; i < particleCount; i += 1) {
+          const seed = hashNum(i * 131 + 17)
+          const left = 4 + ((seed % 1000) / 1000) * 92
+          const top = 24 + ((hashNum(seed) % 1000) / 1000) * 62
+          const duration = (reduced ? 0 : 15 + (seed % 120) / 8).toFixed(1)
+          const delay = '-' + ((seed % 240) / 10).toFixed(1) + 's'
+          const dx = (hashNum(seed >> 4) % 200) - 100
+          dust +=
+            '<span class="cg-particle cg-particle-' + particles + '" data-glyph="' + particles + '" style="left:' + left.toFixed(1) +
+            '%;top:' + top.toFixed(1) + '%;animation-duration:' + duration + 's;animation-delay:' + delay + ';--cg-dx:' + dx + 'px"></span>'
+        }
+        out += dust
+      }
+      return out
+    }
+
+    /**
+     * Renders the ambient layer into one fixed, pointer-events-none root above
+     * the conversation column. The root is shared by reference counting, and
+     * markup is rebuilt only when the plan or the column's geometry changes,
+     * so a long turn no longer restarts every vine animation at each step.
      */
     function GardenOverlay(props) {
-      const garden = props.garden
+      const plan = props.plan !== null && typeof props.plan === 'object' ? props.plan : { vines: 0, edge: [], particles: null, particlesCount: 0 }
       const season = props.season
-      const ivy = Math.max(0, Math.floor(num(garden.counts.ivy)))
-      const dandelions = Math.max(0, Math.floor(num(garden.counts.dandelion)))
+      const [box, setBox] = React.useState(null)
       const hostRef = React.useRef(null)
-      const dataRef = React.useRef({ ivy, dandelions })
-      dataRef.current = { ivy, dandelions }
 
       React.useEffect(() => {
         if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.body) return undefined
-        let root = document.querySelector('.cg-overlay-root')
-        const created = root === null
-        if (root === null) {
-          root = document.createElement('div')
-          root.className = 'cg-overlay-root cg-root'
-          document.body.appendChild(root)
-        }
-        hostRef.current = root
-        const paint = () => {
+        const acquired = acquireOverlayRoot(document)
+        hostRef.current = acquired.root
+        const measure = () => {
           const node = document.querySelector('[data-conversation-region="chat"]')
           const rect = node !== null && typeof node.getBoundingClientRect === 'function' ? node.getBoundingClientRect() : null
-          const box = {
-            left: rect === null ? 0 : Math.max(0, rect.left),
-            top: rect === null ? 0 : Math.max(0, rect.top),
-            width: rect === null ? window.innerWidth : rect.width,
-            height: rect === null ? window.innerHeight : rect.height,
+          if (rect === null) {
+            setBox({ left: 0, top: 0, width: typeof window === 'object' ? window.innerWidth : 1280, height: typeof window === 'object' ? window.innerHeight : 800 })
+            return
           }
-          root.style.left = box.left + 'px'
-          root.style.top = box.top + 'px'
-          root.style.width = box.width + 'px'
-          root.style.height = box.height + 'px'
-          const latest = dataRef.current
-          root.innerHTML = buildOverlayMarkup(box, { ivy: latest.ivy, dandelions: latest.dandelions })
+          setBox({ left: Math.max(0, rect.left), top: Math.max(0, rect.top), width: rect.width, height: rect.height })
         }
-        paint()
+        measure()
         let timer = 0
         const schedule = () => {
           if (timer !== 0) return
           timer = setTimeout(() => {
             timer = 0
-            paint()
-          }, 180)
+            measure()
+          }, 160)
         }
         window.addEventListener('resize', schedule)
         let observer = null
@@ -1528,19 +1761,53 @@ window.__ModuleLoader__.load({
           window.removeEventListener('resize', schedule)
           if (timer !== 0) clearTimeout(timer)
           if (observer !== null) observer.disconnect()
-          if (created && root.parentNode !== null) root.parentNode.removeChild(root)
+          releaseOverlayRoot(document, acquired.token)
+          hostRef.current = null
         }
       }, [])
 
+      const signature = JSON.stringify(plan)
       React.useEffect(() => {
         const root = hostRef.current
-        if (root === null || root === undefined) return
-        dataRef.current = { ivy, dandelions }
-        const box = { width: root.clientWidth || 1000, height: root.clientHeight || 800 }
-        root.innerHTML = buildOverlayMarkup(box, { ivy, dandelions })
-      }, [ivy, dandelions, season.key])
+        if (root === null || box === null) return
+        root.style.left = box.left + 'px'
+        root.style.top = box.top + 'px'
+        root.style.width = box.width + 'px'
+        root.style.height = box.height + 'px'
+        root.setAttribute('data-season', season !== null && season !== undefined ? season.key : 'summer')
+        root.innerHTML = buildOverlayMarkup(box, plan)
+      }, [signature, box])
 
       return null
+    }
+
+    /** Reference-counted singleton for the fixed ambient root. */
+    function acquireOverlayRoot(doc) {
+      const registry = globalThis.__dshContextGardenOverlay || (globalThis.__dshContextGardenOverlay = { root: null, refs: 0, token: 0 })
+      if (registry.root === null || registry.root.parentNode === null) {
+        let root = doc.querySelector('.cg-overlay-root')
+        if (root === null) {
+          root = doc.createElement('div')
+          root.className = 'cg-overlay-root cg-root'
+          doc.body.appendChild(root)
+        }
+        registry.root = root
+        registry.refs = 0
+      }
+      registry.refs += 1
+      registry.token += 1
+      return { root: registry.root, token: registry.token }
+    }
+
+    function releaseOverlayRoot(doc, token) {
+      const registry = globalThis.__dshContextGardenOverlay
+      if (!registry || registry.token !== token) return
+      registry.refs -= 1
+      if (registry.refs > 0) return
+      registry.refs = 0
+      const root = registry.root
+      registry.root = null
+      if (root !== null && root.parentNode !== null) root.parentNode.removeChild(root)
     }
 
     /** Enso season mark used by the composer strip and the panel header. */
@@ -1554,7 +1821,7 @@ window.__ModuleLoader__.load({
           'data-season': season.key,
           title: tr('season.' + season.key) + ' · ' + tr('season.' + season.key + 'Line'),
         },
-        h('span', { className: 'cg-enso', 'aria-hidden': true }, SEASON_GLYPH[season.key]),
+        h('span', { className: 'cg-enso', key: season.key, 'aria-hidden': true }, SEASON_GLYPH[season.key]),
       )
     }
 
@@ -1568,9 +1835,18 @@ window.__ModuleLoader__.load({
       const season = seasonOf(garden, pressure)
       const flash = useHarvestFlash(garden)
       const shownSeeds = useCountUp(garden.seeds)
+      const reduced = useReducedMotion()
+      const ambient = ambientPlan(garden, season, { reduced })
       const openGarden = typeof props.openGardenTab === 'function' ? props.openGardenTab : null
-      const hint = tr('season.' + season.key + 'Line')
-      const label = tr('a11y.openGarden') + ' · ' + tr('season.' + season.key) + ' · ' + hint
+      const pressurePct = season.pressure === null ? null : Math.round(season.pressure * 100)
+      const line = tr('season.' + season.key + 'Line')
+      const label =
+        tr('a11y.openGarden') +
+        ' · ' +
+        tr('season.' + season.key) +
+        ' · ' +
+        line +
+        (pressurePct === null ? '' : ' · ' + pressurePct + '%')
 
       const onKeyDown = (event) => {
         if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
@@ -1591,6 +1867,7 @@ window.__ModuleLoader__.load({
             tabIndex: 0,
             title: label,
             'aria-label': label,
+            'data-pressure': pressurePct === null ? '' : String(pressurePct),
             onClick: () => {
               if (openGarden !== null) openGarden()
             },
@@ -1617,29 +1894,32 @@ window.__ModuleLoader__.load({
                 })
               : null,
           ),
+          pressurePct === null
+            ? null
+            : h('span', {
+                className: 'cg-dock-moisture',
+                'aria-hidden': true,
+                style: { width: clamp(pressurePct, 0, 100) + '%' },
+              }),
           h(SeasonMark, { season, tr }),
-          h(GardenBed, { garden, season, flash, tr }),
+          h(GardenBed, { garden, season, flash, tr, ambient }),
           h(
             'span',
             { className: 'cg-dock-stats' },
             h(
               'span',
-              { className: 'cg-stat', key: 'seeds' },
+              { className: 'cg-stat', key: 'seeds', title: tr('panel.seedBalance') },
               h('b', null, String(shownSeeds)),
-              h('span', null, tr('dock.seeds')),
+              h('span', { className: 'cg-stat-label' }, tr('dock.seeds')),
             ),
             h(
               'span',
-              { className: 'cg-stat', key: 'harvests' },
+              { className: 'cg-stat', key: 'harvests', title: tr('panel.harvestTotal') },
               h('b', null, String(garden.harvestCount)),
-              h('span', null, tr('dock.harvests')),
+              h('span', { className: 'cg-stat-label' }, tr('dock.harvests')),
             ),
           ),
-          h(
-            'span',
-            { className: 'cg-dock-caption' },
-            tr('season.' + season.key) + ' · ' + tr('season.' + season.key + 'Line'),
-          ),
+          h('span', { className: 'cg-dock-caption' }, line),
           flash !== null
             ? h(
                 'span',
@@ -1648,7 +1928,7 @@ window.__ModuleLoader__.load({
               )
             : null,
         ),
-        h(GardenOverlay, { garden, season, tr }),
+        h(GardenOverlay, { plan: ambient, season, tr }),
       )
     }
 
@@ -1663,11 +1943,7 @@ window.__ModuleLoader__.load({
         h(
           'span',
           { className: 'cg-kind-icon', 'aria-hidden': true },
-          h(
-            'svg',
-            { viewBox: '-10 -22 20 24', width: 20, height: 24 },
-            h(PlantGlyph, { kind }),
-          ),
+          h(SpeciesArt, { kind, className: 'cg-kind-art' }),
         ),
         h(
           'span',
@@ -1893,11 +2169,7 @@ window.__ModuleLoader__.load({
                 h(
                   'span',
                   { className: 'cg-legend-art', 'aria-hidden': true },
-                  h(
-                    'svg',
-                    { viewBox: '-10 -22 20 24', width: 18, height: 22 },
-                    h(PlantGlyph, { kind }),
-                  ),
+                  h(SpeciesArt, { kind, className: 'cg-legend-svg' }),
                 ),
                 h('b', null, tr('kind.' + kind)),
                 h('span', null, tr('kind.' + kind + 'Mean')),
@@ -1920,10 +2192,10 @@ window.__ModuleLoader__.load({
     const CSS = [
       // palette + root
       '.cg-root{--cg-serif:"Iowan Old Style","Palatino Linotype","Songti SC","Noto Serif SC","Source Han Serif SC",Georgia,serif;--cg-paper:#f7f2e7;--cg-paper-2:#efe7d7;--cg-ink:#3b3a34;--cg-ink-2:#6d685b;--cg-ink-3:#9a9383;--cg-line:rgba(59,58,52,.13);--cg-line-2:rgba(59,58,52,.08);--cg-band:#f3ecdd;',
-      '--cg-moss:#84977a;--cg-leaf:#7d9a74;--cg-leaf-deep:#5c7a5b;--cg-sprout:#a4bd7f;--cg-grass:#7fa08a;--cg-bamboo:#6f9377;--cg-amber:#c1965c;--cg-weed:#a98a5f;--cg-blossom:#e2bcba;--cg-water:#9db9c1;--cg-snow:#e6edee;--cg-moon:#e8e3d2;--cg-sun:#e6cfa4;--cg-stone:#a8a496;--cg-soil:#8b7b5f;--cg-soil-2:#6f6249;--cg-soil-line:#4f4534;--cg-rice:#c8a55e;--cg-ivy:#6f8f62;--cg-dandelion:#cfc9b4;--cg-mushroom:#b07a5e;--cg-mushroom-stem:#e9dfcc;--cg-lotus:#e3b9c0;',
+      '--cg-moss:#84977a;--cg-leaf:#7d9a74;--cg-leaf-deep:#5c7a5b;--cg-sprout:#a4bd7f;--cg-grass:#7fa08a;--cg-bamboo:#6f9377;--cg-amber:#c1965c;--cg-weed:#a98a5f;--cg-blossom:#e2bcba;--cg-water:#9db9c1;--cg-snow:#e6edee;--cg-moon:#e8e3d2;--cg-sun:#e6cfa4;--cg-stone:#a8a496;--cg-soil:#9a8a6d;--cg-soil-2:#7a6b52;--cg-soil-line:#4f4534;--cg-rice:#c8a55e;--cg-ivy:#6f8f62;--cg-dandelion:#b9ae94;--cg-mushroom:#b07a5e;--cg-mushroom-stem:#e9dfcc;--cg-lotus:#e3b9c0;--cg-outline:rgba(59,58,52,.42);--cg-ambient-vine:#6f8f62;--cg-seed:color-mix(in srgb,var(--cg-dandelion) 58%,var(--cg-ink) 42%);',
       '--cg-sky-1:#f2ead8;--cg-sky-2:#e8ddc6;--cg-hill:#c8c2a8;--cg-hill-2:#b7b39a;--cg-seal:#b0554a}',
       'body[data-ds-dark-theme] .cg-root{--cg-paper:#191d1b;--cg-paper-2:#202623;--cg-ink:#d9d5c9;--cg-ink-2:#a8a397;--cg-ink-3:#77746a;--cg-line:rgba(217,213,201,.16);--cg-line-2:rgba(217,213,201,.08);--cg-band:#1d2320;',
-      '--cg-moss:#7c8f72;--cg-leaf:#7f9878;--cg-leaf-deep:#5f7c60;--cg-sprout:#9cb578;--cg-grass:#7a9a85;--cg-bamboo:#77957b;--cg-amber:#c09a60;--cg-weed:#a58c63;--cg-blossom:#b9948f;--cg-water:#7f9fa8;--cg-snow:#cfd9dc;--cg-moon:#d8d5c8;--cg-sun:#d9c49f;--cg-stone:#8f8c80;--cg-soil:#5d5442;--cg-soil-2:#463f30;--cg-soil-line:#2c271d;--cg-rice:#c2a165;--cg-ivy:#78996c;--cg-dandelion:#b9b6a8;--cg-mushroom:#a96f55;--cg-mushroom-stem:#c9c0ad;--cg-lotus:#cfa7ad;',
+      '--cg-moss:#7c8f72;--cg-leaf:#7f9878;--cg-leaf-deep:#5f7c60;--cg-sprout:#9cb578;--cg-grass:#7a9a85;--cg-bamboo:#77957b;--cg-amber:#c09a60;--cg-weed:#a58c63;--cg-blossom:#b9948f;--cg-water:#7f9fa8;--cg-snow:#cfd9dc;--cg-moon:#d8d5c8;--cg-sun:#d9c49f;--cg-stone:#8f8c80;--cg-soil:#4a463c;--cg-soil-2:#38352d;--cg-soil-line:#221f18;--cg-rice:#c2a165;--cg-ivy:#78996c;--cg-dandelion:#c8c2ae;--cg-mushroom:#a96f55;--cg-mushroom-stem:#c9c0ad;--cg-lotus:#cfa7ad;--cg-outline:rgba(12,14,13,.55);--cg-ambient-vine:#78996c;--cg-seed:color-mix(in srgb,var(--cg-dandelion) 72%,var(--cg-snow) 28%);',
       '--cg-sky-1:#1c2320;--cg-sky-2:#232b27;--cg-hill:#3a463d;--cg-hill-2:#333d36;--cg-seal:#a8564c}',
       // scene seasonal palettes
       '.cg-scene{--cg-sky-1:#f2ead8;--cg-sky-2:#e8ddc6;--cg-hill:#c8c2a8;--cg-hill-2:#b7b39a;--cg-soil:#8b7b5f;--cg-soil-2:#6f6249;--cg-soil-line:#4f4534}',
@@ -1955,38 +2227,63 @@ window.__ModuleLoader__.load({
       '@keyframes cg-drift{0%{transform:translate(0,-6px);opacity:0}12%{opacity:var(--cg-po,.6)}82%{opacity:var(--cg-po,.6)}100%{transform:translate(12px,40px);opacity:0}}',
       '@keyframes cg-banner{0%{opacity:0;transform:translateY(-3px)}12%{opacity:1;transform:none}78%{opacity:1}100%{opacity:0;transform:translateY(-2px)}}',
       '@keyframes cg-gain{0%{opacity:0;transform:translateY(5px)}16%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translateY(-9px)}}',
-      '@keyframes cg-bed-fly{0%{opacity:1}55%{opacity:.85}100%{transform:translateX(-50%) translate(26px,-46px) scale(calc(var(--cg-scale,1) * .35));opacity:0}}',
+      '@keyframes cg-bed-fly{0%{opacity:var(--cg-op,1);transform:translateX(-50%) translateY(var(--cg-lift,0)) scale(var(--cg-scale,1))}55%{opacity:.9}100%{transform:translateX(-50%) translate(var(--cg-fly-x,26px),-42px) scale(calc(var(--cg-scale,1) * .34));opacity:0}}',
       '@keyframes cg-vine-draw{to{stroke-dashoffset:0}}',
       '@keyframes cg-leaf-in{0%{opacity:0}100%{opacity:.55}}',
-      '@keyframes cg-seed-drift{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:.72}55%{transform:translate(calc(var(--cg-dx,30px) * .55),-46vh) rotate(160deg)}100%{transform:translate(var(--cg-dx,30px),-96vh) rotate(320deg);opacity:0}}',
+      '@keyframes cg-drift{0%{transform:translate(0,4px) rotate(0);opacity:0}10%{opacity:1}55%{transform:translate(calc(var(--cg-dx,30px) * .5),-42vh) rotate(150deg)}100%{transform:translate(var(--cg-dx,30px),-92vh) rotate(300deg);opacity:0}}',
+      '@keyframes cg-enso-in{0%{opacity:0;transform:rotate(-30deg) scale(.86)}100%{opacity:1;transform:rotate(-14deg) scale(1)}}',
       // dock
       '.cg-dock-row{display:flex;align-items:flex-end;justify-content:flex-start;box-sizing:border-box;width:calc(100% - var(--dsh-composer-side-clearance,20px) - var(--dsh-composer-side-clearance,20px));max-width:var(--dsh-composer-card-max-width,820px);margin:0 auto calc(0px - var(--dsh-composer-stack-gap,6px) - 3px);padding:0;flex:none}',
-      '.cg-dock{position:relative;display:flex;align-items:flex-end;gap:8px;width:100%;height:44px;box-sizing:border-box;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:var(--dsw-alias-label-secondary,#6b6b6b);font:inherit;text-align:left;cursor:pointer;max-width:100%}',
-      '.cg-dock-soil{position:absolute;left:0;right:0;bottom:0;display:block;width:100%;height:12px;pointer-events:none}',
+      '.cg-dock{position:relative;display:flex;align-items:flex-end;gap:7px;width:100%;height:46px;box-sizing:border-box;padding:0;margin:0;border:0;border-radius:0;background:transparent;color:var(--dsw-alias-label-secondary,#6b6b6b);font:inherit;text-align:left;cursor:pointer;max-width:100%}',
+      '.cg-dock:hover .cg-dock-soil{filter:brightness(1.07) saturate(1.04)}',
+      '.cg-dock:hover .cg-bed-plant{--cg-lift:-1px}',
       '.cg-dock:hover .cg-dock-caption{color:var(--cg-ink)}',
       '.cg-dock:focus-visible{outline:1.5px solid var(--dsw-alias-brand-primary,#4c6ef5);outline-offset:2px}',
-      '.cg-season-mark{display:inline-flex;align-items:center;flex:none;padding-bottom:13px;z-index:2}',
-      '.cg-enso{width:24px;height:24px;border-radius:50%;border:1.4px solid var(--cg-ink-3);border-right-color:transparent;display:grid;place-items:center;font-family:var(--cg-serif);font-size:11px;line-height:1;color:var(--cg-ink-2);transform:rotate(-14deg);flex:none}',
-      '.cg-season-mark-label{font-size:9.5px;letter-spacing:.14em;color:var(--cg-ink-3);font-family:var(--cg-serif)}',
-      '.cg-bed{position:relative;flex:1 1 auto;min-width:0;height:44px;overflow:visible;z-index:1}',
-      '.cg-bed-ground{position:absolute;left:0;right:0;bottom:0;display:block;width:100%;height:11px;pointer-events:none}',
-      '.cg-bed-plant{position:absolute;bottom:12px;display:block;line-height:0;transform:translateX(-50%) scale(var(--cg-scale,1));transform-origin:50% 100%;pointer-events:none}',
+      '.cg-dock-soil{position:absolute;left:0;right:0;bottom:0;display:block;width:100%;height:13px;pointer-events:none;border-radius:var(--dsw-radius-panel,16px) var(--dsw-radius-panel,16px) 0 0;transition:filter .2s ease}',
+      '.cg-dock-moisture{position:absolute;left:0;bottom:0;height:2px;border-radius:0 2px 0 0;background:linear-gradient(90deg,color-mix(in srgb,var(--cg-water) 70%,transparent),var(--cg-moss));opacity:.55;pointer-events:none;transition:width .6s ease}',
+      '.cg-season-mark{display:inline-flex;align-items:center;flex:none;padding-bottom:14px;z-index:2}',
+      '.cg-enso{width:26px;height:26px;border-radius:50%;border:1.4px solid var(--cg-ink-3);border-right-color:transparent;display:grid;place-items:center;font-family:var(--cg-serif);font-size:12px;line-height:1;color:var(--cg-ink-2);transform:rotate(-14deg);flex:none;animation:cg-enso-in .28s ease-out}',
+      '.cg-bed{position:relative;flex:1 1 auto;min-width:0;height:46px;overflow:visible;z-index:1}',
+      '.cg-bed-plant{position:absolute;bottom:12px;display:block;line-height:0;transform:translateX(-50%) translateY(var(--cg-lift,0)) scale(var(--cg-scale,1));transform-origin:50% 100%;pointer-events:none;opacity:var(--cg-op,1);transition:transform .2s ease,opacity .2s ease}',
+      '.cg-bed-plant::after{content:"";position:absolute;left:50%;bottom:-1px;width:calc(var(--cg-art-h) * .62);height:3px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--cg-soil-line) 55%,transparent),transparent 72%);pointer-events:none}',
       '.cg-bed-sway{display:block;transform-origin:50% 100%;animation:cg-sway var(--cg-sway-dur,6s) ease-in-out infinite;animation-delay:var(--cg-sway-delay,0s)}',
-      '.cg-bed-plant.cg-bed-fly{animation:cg-bed-fly 1s cubic-bezier(.45,0,.3,1) forwards}',
+      '.cg-bed-plant.cg-bed-harvesting{animation:cg-bed-fly 1.05s cubic-bezier(.42,0,.3,1) forwards}',
+      '.cg-art-svg{display:block;height:var(--cg-art-h,18px);width:auto;overflow:visible}',
+      '.cg-kind-art{display:block;height:22px;width:auto;overflow:visible}',
+      '.cg-legend-svg{display:block;height:18px;width:auto;overflow:visible}',
+      '.cg-bed-brim{position:absolute;bottom:12px;display:block;line-height:0;transform:translateX(-50%) scale(.9);transform-origin:50% 100%;opacity:.42;pointer-events:none;z-index:0}',
+      '.cg-brim-art{display:block;height:var(--cg-brim-h,12px);width:auto;overflow:visible}',
       '.cg-bed-mound{position:absolute;left:50%;bottom:12px;width:46px;height:14px;transform:translateX(-50%);pointer-events:none;opacity:.9}',
-      '.cg-dock-stats{display:inline-flex;align-items:baseline;gap:8px;flex:none;font-variant-numeric:tabular-nums;white-space:nowrap;padding-bottom:14px;z-index:2}',
+      '.cg-dock-stats{display:inline-flex;align-items:baseline;gap:8px;flex:none;font-variant-numeric:tabular-nums;white-space:nowrap;padding-bottom:15px;z-index:2}',
       '.cg-stat{display:inline-flex;align-items:baseline;gap:3px}',
-      '.cg-stat b{font-size:11px;font-weight:600;color:var(--cg-ink)}',
-      '.cg-stat span{font-size:7.5px;letter-spacing:.1em;color:var(--cg-ink-3)}',
-      '.cg-gain{font-size:9.5px;color:var(--cg-amber);font-variant-numeric:tabular-nums;animation:cg-gain 2.3s ease forwards;white-space:nowrap;padding-bottom:14px;z-index:2}',
-      '.cg-dock-caption{flex:none;font-size:10.5px;letter-spacing:.04em;color:var(--cg-ink-2);font-family:var(--cg-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;padding-bottom:14px;z-index:2}',
+      '.cg-stat b{font-size:11.5px;font-weight:600;color:var(--cg-ink);letter-spacing:.01em}',
+      '.cg-stat-label{font-size:7.5px;letter-spacing:.1em;color:var(--cg-ink-3)}',
+      '.cg-gain{font-size:9.5px;color:var(--cg-amber);font-variant-numeric:tabular-nums;animation:cg-gain 2.3s ease forwards;white-space:nowrap;padding-bottom:15px;z-index:2}',
+      '.cg-dock-caption{flex:none;font-size:10.5px;letter-spacing:.05em;color:var(--cg-ink-2);font-family:var(--cg-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;padding-bottom:15px;z-index:2;transition:color .2s ease}',
+      '.cg-overlay-root[data-season="autumn"]{--cg-ambient-vine:color-mix(in srgb,var(--cg-ivy) 52%,var(--cg-amber) 48%);opacity:.92}',
+      '.cg-overlay-root[data-season="winter"]{--cg-ambient-vine:color-mix(in srgb,var(--cg-ivy) 45%,var(--cg-snow) 55%);opacity:.8}',
+      '.cg-overlay-root[data-season="spring"]{--cg-ambient-vine:color-mix(in srgb,var(--cg-ivy) 70%,var(--cg-sprout) 30%)}',
       // ambient conversation overlay
-      '.cg-overlay-root{position:fixed;pointer-events:none;z-index:4;overflow:hidden;opacity:.9}',
-      '.cg-overlay-vines{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none}',
-      '.cg-vine{fill:none;stroke:var(--cg-ivy);stroke-width:1.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:cg-vine-draw 2.6s ease-out forwards;opacity:.6}',
-      '.cg-vine-tendril{stroke-width:.9;opacity:.4}',
-      '.cg-vine-leaf{fill:var(--cg-ivy);opacity:0;animation:cg-leaf-in 1.8s ease-out forwards}',
-      '.cg-overlay-seed{position:absolute;display:block;line-height:0;opacity:0;animation-name:cg-seed-drift;animation-timing-function:linear;animation-iteration-count:infinite}',
+      '.cg-overlay-root{position:fixed;pointer-events:none;z-index:4;overflow:hidden;isolation:isolate}',
+      '.cg-ambient-vine-layer{position:absolute;inset:0;pointer-events:none}',
+      '.cg-ambient-vines{position:absolute;top:0;bottom:0;left:0;display:block;width:64px;height:100%;overflow:visible;opacity:.9}',
+      '.cg-ambient-vines-right{left:auto;right:0;transform:scaleX(-1)}',
+      '.cg-vine{fill:none;stroke:var(--cg-ambient-vine,var(--cg-ivy));stroke-width:1.8;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:cg-vine-draw 2.6s ease-out forwards;opacity:.66}',
+      '.cg-vine-tendril{stroke-width:.9;opacity:.36}',
+      '.cg-vine-leaf{fill:var(--cg-ambient-vine,var(--cg-ivy));opacity:0;animation:cg-leaf-in 1.8s ease-out forwards;transform-box:fill-box;transform-origin:center}',
+      '.cg-ambient-edge{position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none}',
+      '.cg-edge-item{position:absolute;bottom:0;display:block;line-height:0;transform:translateX(-50%) scale(.92);transform-origin:50% 100%;opacity:.5}',
+      '.cg-edge-item svg{display:block;height:calc(var(--cg-edge-h,17px) * 1.1);width:auto;overflow:visible}',
+      '.cg-particle{position:absolute;display:block;width:9px;height:11px;opacity:0;pointer-events:none;animation-name:cg-drift;animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform,opacity}',
+      '.cg-particle::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--cg-particle-color,var(--cg-blossom));box-shadow:0 0 2px color-mix(in srgb,var(--cg-particle-color,var(--cg-blossom)) 40%,transparent)}',
+      '.cg-particle-petal{--cg-particle-color:var(--cg-blossom);width:7px;height:5px;border-radius:60% 40% 55% 45%;opacity:.7}',
+      '.cg-particle-petal::before{border-radius:60% 40% 55% 45%}',
+      '.cg-particle-pollen{--cg-particle-color:var(--cg-sprout);width:3px;height:3px;opacity:.5}',
+      '.cg-particle-gold{--cg-particle-color:var(--cg-rice);width:3px;height:4px;opacity:.55}',
+      '.cg-particle-snow{--cg-particle-color:var(--cg-snow);width:3.5px;height:3.5px;opacity:.65;box-shadow:0 0 3px color-mix(in srgb,var(--cg-snow) 60%,transparent)}',
+      '.cg-particle-seeds{width:9px;height:12px;opacity:.6}',
+      '.cg-particle-seeds::before{background:radial-gradient(circle at 50% 20%,var(--cg-seed) 0 30%,transparent 34%),radial-gradient(circle at 70% 36%,var(--cg-seed) 0 20%,transparent 24%),radial-gradient(circle at 30% 36%,var(--cg-seed) 0 16%,transparent 20%),radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--cg-seed) 60%,transparent) 0 14%,transparent 18%);border-radius:0;box-shadow:none}',
+      '.cg-particle-seeds::after{content:"";position:absolute;left:50%;bottom:0;width:1px;height:58%;transform:translateX(-50%);background:color-mix(in srgb,var(--cg-ambient-vine) 62%,transparent);border-radius:1px}',
       // panel
       '.cg-panel{display:flex;flex-direction:column;gap:15px;width:100%;box-sizing:border-box;padding:16px 15px 26px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:12px;line-height:1.55;background:linear-gradient(180deg,color-mix(in srgb,var(--cg-paper-2) 55%,transparent),transparent 260px)}',
       '.cg-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}',
@@ -2036,7 +2333,10 @@ window.__ModuleLoader__.load({
       '.cg-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--cg-moss, #84977a);box-shadow:0 0 0 2.5px color-mix(in srgb,currentColor 12%,transparent)}',
       // small screens and reduced motion
       '@media (max-width: 1120px){.cg-dock-caption{display:none}}',
-      '@media (prefers-reduced-motion: reduce){.cg-sway,.cg-bed-sway,.cg-plant.cg-sway,.cg-plant.cg-fly,.cg-plant .cg-grow,.cg-particle,.cg-gain,.cg-scene-banner,.cg-balance .cg-gain,.cg-bed-plant.cg-bed-fly{animation:none !important}.cg-bed-plant.cg-bed-fly,.cg-plant.cg-fly{opacity:0}.cg-vine{stroke-dashoffset:0;animation:none;opacity:.5}.cg-vine-leaf{animation:none;opacity:.5}.cg-overlay-seed{display:none}}',
+      '@media (max-width: 900px){.cg-stat-label{display:none}.cg-dock{gap:5px}.cg-enso{width:23px;height:23px;font-size:11px}}',
+      '@media (max-width: 560px){.cg-dock{height:40px}.cg-bed{height:40px}.cg-season-mark{padding-bottom:12px}.cg-dock-stats{padding-bottom:13px}.cg-gain{padding-bottom:13px}}',
+      '@media (max-width: 380px){.cg-dock-caption,.cg-dock-stats{display:none}}',
+      '@media (prefers-reduced-motion: reduce){.cg-sway,.cg-bed-sway,.cg-plant.cg-sway,.cg-plant.cg-fly,.cg-plant .cg-grow,.cg-particle,.cg-gain,.cg-scene-banner,.cg-balance .cg-gain,.cg-bed-plant.cg-bed-harvesting,.cg-enso{animation:none !important}.cg-bed-plant.cg-bed-harvesting,.cg-plant.cg-fly{opacity:0}.cg-vine{stroke-dashoffset:0;animation:none;opacity:.45}.cg-vine-leaf{animation:none;opacity:.45}.cg-particle{display:none}}',
     ].join('')
 
     // ---- plugin --------------------------------------------------------
@@ -2118,6 +2418,15 @@ window.__ModuleLoader__.load({
         GardenBed,
         GardenOverlay,
         buildOverlayMarkup,
+        ambientPlan,
+        edgeItems,
+        sampleField,
+        SPECIES_ART,
+        BED_ROWS,
+        SEASON_AMBIENT,
+        GLYPH_MARKUP,
+        SpeciesArt,
+        MAX_BED_PLANTS,
         PlantGlyph,
         SeasonRing,
         GardenTitle,

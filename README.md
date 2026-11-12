@@ -6,7 +6,7 @@
 
 **中文：** 把上下文窗口种成一座禅意花园：每条消息或工具结果种下十一种植物之一（代码=仙人掌、图片=花、报错=杂草、回答=竹、文书=稻穗、网络=蒲公英……），每次上下文压缩就是收割季，植物化为种子货币；会话渐深时，爬山虎会沿对话边缘攀爬，蒲公英的种子在对话间飘散，田地随四季重新播种。
 
-The garden is folded out of the session log the Harness already records. It adds no prompt, no tool, no model call and no session write; in v0.2.0 it opens no HTTP route either. Reopen the session, replay the log, or open it on another machine — the same garden grows back.
+The garden is folded out of the session log the Harness already records. It adds no prompt, no tool, no model call and no session write; in v0.3.0 it opens no HTTP route either. Reopen the session, replay the log, or open it on another machine — the same garden grows back.
 
 [中文说明 →](README.zh.md)
 
@@ -64,14 +64,14 @@ Field occupancy comes from the Harness's `contextPressure` (context used / conte
 
 ### The garden bed on the composer
 
-A full-width, borderless bed resting directly on the top edge of the composer card (`conversation.input.dock`, order 4, id `context-garden`). It has no card, pill, border or background of its own: the bed spans the composer's width, draws its soil as a thin strip along the input's top edge, and the plants grow straight out of it. On the left, a small enso holding the season character; across the width, up to 26 swaying SVG plants; on the right, the seed balance, the harvest count, and the season line (hidden on narrow windows). The whole bed is a single button: click it (or press Enter) to open the full garden. An empty bed shows bare soil and a small seed mound; the full panel shows the 待播种 line. When a harvest fires, the bed's plants fly up, the seed number rolls and the gain rises beside it; the full panel scene also drifts snow dust — for at most 2.6 s.
+A full-width, borderless bed resting directly on the top edge of the composer card (`conversation.input.dock`, order 4, id `context-garden`). It has no card, pill, border or background of its own: the soil is a thin strip along the input's top edge with the composer's own top radius, and the plants grow straight out of it with a soft contact shadow. On the left, a small enso holding the season character; across the width, the plants sampled for composition — each species present gets a seat, the rest is shared by proportion, and each species contributes its newest specimens — laid out in three depth rows (back rows smaller and fainter) at about one plant per 30 px, from 6 to 30 depending on the measured width. Quiet flora (grass tufts, sprouts, mushrooms, weeds, a lotus ripple) grows along the same soil line, taken from the session's lifetime counts. On the right, the seed balance, the harvest count, and the season line; a hairline of moisture in the soil shows the context pressure. The whole bed is a single button: click it (or press Enter) to open the full garden. An empty bed shows bare soil and a small seed mound; the full panel shows the 待播种 line. When a harvest fires, every plant flies toward the seed balance on the right (staggered by row), the seed number rolls and the gain rises beside it; the full panel scene also drifts snow dust — for at most 2.6 s.
 
 ### The Garden tab in the right sidebar
 
 A right-sidebar tab (id `@ruaibeite/dsh-context-garden/garden`, kind `context-garden`: registered with `sidebarRightTabs.register`, opened with `sidebarRight.openTab('context-garden')`). Its tab label reads 花园 / Garden. From top to bottom:
 
 - the title and the current season with its one-line note; a vermilion seal carved 园 and a small enso sit in the corner;
-- a large field scene (16:9, at least 168 px tall): sky, far hills, a sun disc, raked sand, and up to 30 plants placed by a stable hash; right after a harvest the single lotus stands in it; an empty field shows a quiet caption chip inside the scene;
+- a large field scene (16:9, at least 168 px tall): sky, far hills, a sun disc, raked sand, and up to 30 plants sampled for composition; right after a harvest the single lotus stands in it; an empty field shows a quiet caption chip inside the scene;
 - a 96 px four-season ring whose four arcs mark the seasons and whose center carries only the season character; beside it the season note, the field occupancy, the field and planting counts, a fill bar, and a 「收割将至」 hint once occupancy reaches 78% (not in winter);
 - the seed store: the balance and one row for each of the eleven species with its harvested and seed counts, headed 收割 · 种子;
 - the harvest log: the most recent five harvests;
@@ -83,34 +83,20 @@ Both surfaces follow the Harness theme (`body[data-ds-dark-theme]`) and its `--d
 
 ## Ambient growth
 
-Two quiet effects grow around the conversation, never intercepting a click or a key (`pointer-events: none`), both folded from the same projection:
+The garden does not stop at the composer. A fixed, pointer-events-none layer over the conversation column reads the same session and grows with it:
 
-- **Ivy** — each internal tool-only step plants an ivy; as the lifetime ivy count grows, vine segments climb in from the left and right edges of the conversation, one segment per 40 ivy, up to 10 segments.
-- **Dandelion** — each web excursion plants a dandelion; drifting dandelion seeds float across the conversation, growing with the lifetime dandelion count up to 30 seeds.
+- **Ivy** climbs the left and right edges as tool-only steps accumulate (up to sixteen segments; each segment is a drawn vine with a tendril and four leaves). The strips are 64 px wide and scale uniformly, so the vines never stretch with the window.
+- **Dandelion seeds** drift across the whole column once the session has web results (up to forty, each a soft seed head with a hairline stem).
+- When there are no dandelions, the season provides the particle family instead: petals in spring, pollen in summer, gold dust in autumn, snow in winter — so the layer is never empty.
+- Ivy and particles are the only dynamic effects; the layer is capped at two dynamic families at once. It is decorative weather, not a second field.
 
-Both effects exist only once their plants do: ivy is common (any tool-only step), dandelions need web tools. Under `prefers-reduced-motion: reduce` the drifting seeds are not rendered and the vines hold still.
+Everything is theme-aware (the seeds are darker on light paper and lighter in the dark theme, the vines are tinted by the season), and the whole layer collapses gracefully:
 
-## Screenshots
-
-The full-width garden bed on the composer — the season mark, the swaying bed of plants, the seed balance, the harvest count and the season line:
-
-![The full-width garden bed on the composer](assets/screenshot-1.png)
-
-The Garden tab in summer, light theme:
-
-![The Garden tab in summer, light theme](assets/screenshot-2.png)
-
-The same tab in dark theme:
-
-![The Garden tab in dark theme](assets/screenshot-3.png)
-
-Right after a harvest: winter, snow on the bed, and the single lotus in the field:
-
-![Winter after a harvest, with the lotus in the field](assets/screenshot-4.png)
-
-Ambient growth: ivy climbing the conversation's edges and dandelion seeds drifting across it:
-
-![Ivy vines and drifting dandelion seeds around the chat](assets/screenshot-5.png)
+| Condition | What happens |
+| --- | --- |
+| `prefers-reduced-motion: reduce` | the drifting particles are dropped entirely (not generated), vines stay as static strokes, the enso stops animating |
+| narrow window (under 420 px of column) | the vines are not drawn and the particles are skipped, leaving the bed as the only surface |
+| dark theme | ambient vines, seeds and edge flora switch to the dark palette |
 
 ## Seeds and the garden
 
@@ -168,24 +154,24 @@ cd dsh-context-garden
 npm test
 ```
 
-No dependencies — 70 checks run on plain Node: 49 host tests and 21 render tests. `test/host.mjs` covers the projection (eleven-kind classification, every fold rule including ivy and the post-harvest lotus, seed math and conservation across a multi-season session, damaged-state repair, `apply()` with a fake context). `test/render.mjs` runs the client components in a small in-repo harness: the full-width bed with every species, seasons, milestones, the winter lotus, the harvest flash, the ivy/dandelion overlay builder, the missing-projection fallback, and the bilingual copy.
+No dependencies — 73 checks run on plain Node: 49 host tests and 24 render tests. `test/host.mjs` covers the projection (eleven-kind classification, every fold rule including ivy and the post-harvest lotus, seed math and conservation across a multi-season session, damaged-state repair, `apply()` with a fake context). `test/render.mjs` runs the client components in a small in-repo harness: composition sampling, the width-adaptive bed, every species, seasons, milestones, the winter lotus, the harvest flash, the ambient plan and its overlay markup, the missing-projection fallback, and the bilingual copy.
 
 ## Why it costs nothing
 
 - **No model calls.** It adds no prompt, no model tool and no request.
 - **No session writes.** The projection only reads the session log.
-- **No network.** v0.2.0 registers no HTTP route and contacts no external service.
+- **No network.** v0.3.0 registers no HTTP route and contacts no external service.
 - **Replay-stable.** The same session log always folds into the same garden — reopen, replay, or open on another device.
 - **Visual only.** No tools of its own and no settings surface; one session, one garden.
 
-## Known limits (v0.2.0)
+## Known limits (v0.3.0)
 
 - A season's field keeps at most **240 plants**; older plants fall off the bed. The bed draws the 26 most recent of them and the panel 30. Planting totals still count every event, but a harvest converts only the plants still standing — plants that fell off do not become seeds.
 - The season prefers `contextPressure`; without a context window size it falls back to counting this round's plants (0–8 spring, 9–18 summer, more autumn), so the season is an estimate.
 - The ambient effects are honest about rarity: dandelions need web tools and rice needs document tools, so in an ordinary session those rows can stay empty and the drifting seeds may not appear at all; ivy needs only a tool-calling step and is common.
 - If the locale bundle is missing or fails to load, the surfaces fall back to built-in copy instead of failing to render.
 - The bed lives in an opened session's composer; the welcome page shown before any session exists renders no composer (and no composer dock), so the garden first appears once a session is open.
-- One session, one garden: v0.2.0 has no cross-session overview, no settings page, and registers no tools.
+- One session, one garden: v0.3.0 has no cross-session overview, no settings page, and registers no tools.
 
 ## License
 
