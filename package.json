@@ -1,0 +1,62 @@
+{
+  "name": "@ruaibeite/dsh-context-garden",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Turn the context window into a zen garden: every message or tool result plants a plant (code = cactus, image = flower, error = weed), context compaction is the harvest, and harvested plants become seed currency as the field moves through four seasons.",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "screenshots.json",
+    "assets/icon-180.png",
+    "assets/screenshot-*.png",
+    "LICENSE",
+    "README.md",
+    "README.zh.md",
+    "test/"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "context-window",
+    "context-management",
+    "zen",
+    "garden",
+    "visualization"
+  ],
+  "scripts": {
+    "test": "node test/host.mjs && node test/render.mjs"
+  },
+  "author": "ruaibeite",
+  "homepage": "https://github.com/ruaibeite/dsh-context-garden#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruaibeite/dsh-context-garden.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ruaibeite/dsh-context-garden/issues"
+  }
+}
